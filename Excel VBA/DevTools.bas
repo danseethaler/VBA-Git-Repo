@@ -99,7 +99,7 @@ Private Sub BuildAddin(ByVal sourceDir As String, _
     Dim prj As Object
     Set prj = wb.VBProject
     
-    prj.name = projectName
+    prj.Name = projectName
     
     ImportSourceFiles prj, sourceDir
     
@@ -131,7 +131,7 @@ Private Function HasReference(ByVal project As Object, ByVal refName As String) 
     Dim ref As Variant
     For Each ref In project.References
     
-        If ref.name = refName Then
+        If ref.Name = refName Then
             HasReference = True
             Exit Function
         End If
@@ -180,69 +180,40 @@ Private Function SwitchArch(ByVal libPath As String) As String
     End If
     
 End Function
-'
-' Exporting VBEX
-' --------------
-'
-' Maybe separate this so that Extensibility Lib can be used
-'
-Public Sub ExportSourceFiles(ByVal project As Object, ByVal destPath As String)
 
-    Dim component As Variant
-    For Each component In project.VBComponents
-        
-        Dim compType As Integer
-        compType = component.Type
-    
-        If OughtExport(compType) Then
-        
-            Dim exportPath As String
-            exportPath = destPath & component.name & ToFileExtension(component.Type)
-            component.Export exportPath
-            
-        End If
-    Next
-
-End Sub
 Private Function OughtExport(ByVal compType As CompenentType) As Boolean
 
     OughtExport = ((compType = stdModule) Or (compType = classModule))
     
 End Function
-Private Function ToFileExtension(ByVal compType As CompenentType) As String
 
-    Select Case compType
-        Case CompenentType.classModule
+Public Sub ExportSourceFiles()
+
+    Dim destPath As String
+    Dim component As VBComponent
+    
+    destPath = "C:\Users\danseethaler\Documents\GitHub\VBA-Git-Repo\Excel VBA\"
+    
+    For Each component In Application.VBE.ActiveVBProject.VBComponents
+        If component.Type = vbext_ct_ClassModule Or component.Type = vbext_ct_StdModule Then
+            component.Export destPath & component.Name & ToFileExtension(component.Type)
+        End If
+    Next
+     
+End Sub
+
+Private Function ToFileExtension(vbeComponentType As vbext_ComponentType) As String
+    Select Case vbeComponentType
+        Case vbext_ComponentType.vbext_ct_ClassModule
             ToFileExtension = ".cls"
-            
-        Case CompenentType.stdModule
+        Case vbext_ComponentType.vbext_ct_StdModule
             ToFileExtension = ".bas"
-            
-        Case CompenentType.msForm
+        Case vbext_ComponentType.vbext_ct_MSForm
             ToFileExtension = ".frm"
-            
-        Case CompenentType.activeXDesigner
-            '?
-            
-        Case CompenentType.document
-            '?
-            
+        Case vbext_ComponentType.vbext_ct_ActiveXDesigner
+        Case vbext_ComponentType.vbext_ct_Document
         Case Else
             ToFileExtension = vbNullString
     End Select
-
+     
 End Function
-'
-'Public Sub RemoveAllModules()
-'    Dim project As VBProject
-'    Set project = Application.VBE.ActiveVBProject
-'
-'    Dim comp As VBComponent
-'    For Each comp In project.VBComponents
-'        If Not comp.Name = "DevTools" And (comp.Type = vbext_ct_ClassModule Or comp.Type = vbext_ct_StdModule) Then
-'            project.VBComponents.Remove comp
-'        End If
-'    Next
-'End Sub
-'
-

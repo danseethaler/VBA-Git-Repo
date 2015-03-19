@@ -481,8 +481,13 @@ Loop
 
 End Function
  
-Public Sub ExportSourceFiles(destPath As String)
+Public Sub ExportSourceFiles()
+
+    Dim destPath As String
     Dim component As VBComponent
+    
+    destPath = "C:\Users\danseethaler\Documents\GitHub\VBA-Git-Repo\Excel VBA\"
+    
     For Each component In Application.VBE.ActiveVBProject.VBComponents
         If component.Type = vbext_ct_ClassModule Or component.Type = vbext_ct_StdModule Then
             component.Export destPath & component.Name & ToFileExtension(component.Type)
