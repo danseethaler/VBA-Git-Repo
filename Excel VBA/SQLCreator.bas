@@ -29,12 +29,8 @@ For Each Header In Range("A1:" & Range("A1").End(xlToRight).Address)
     End If
 
 If Header = "Date" Then Header = "DUR"
-
-'If UCase(Right(Header, 2)) = "ID" And Header.Column = 1 Then
-'TableSQL = TableSQL & vbNewLine & "         " & Replace(Header, " ", "_") & DataType & " PRIMARY KEY" & ","
-'Else
 TableSQL = TableSQL & vbNewLine & "         " & Replace(Header, " ", "_") & DataType & ","
-'End If
+
 Next
 
 TableSQL = Left(TableSQL, Len(TableSQL) - 1) & ");"
