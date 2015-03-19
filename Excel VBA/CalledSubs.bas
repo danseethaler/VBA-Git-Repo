@@ -1,4 +1,5 @@
 Attribute VB_Name = "CalledSubs"
+'Determine what assigning an attribute does.
 Option Explicit
 
 'This subroutine writes a line to the usage log with the user's
