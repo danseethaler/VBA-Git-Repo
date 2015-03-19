@@ -14,7 +14,7 @@ Call UsageLog("RC Toggle")
 End Sub
 
 Sub HideError(control As IRibbonControl)
-
+'This sub will toggle the cell errors
 Application.ErrorCheckingOptions.BackgroundChecking = Not _
 Application.ErrorCheckingOptions.BackgroundChecking
 
