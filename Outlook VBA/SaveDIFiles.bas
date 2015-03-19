@@ -109,7 +109,7 @@ Sub SaveDITextFileAttachments()
 
     Excel.ScreenUpdating = False
 
-'Set header values
+'If new workbook then set header values and create sheets
 If DIWorkbook.Sheets(1).Range("A1").Value = "" Then
     DIWorkbook.Sheets(1).Range("A1").Value = "Store"
     DIWorkbook.Sheets(1).Range("B1").Value = "Sender"
@@ -122,6 +122,14 @@ If DIWorkbook.Sheets(1).Range("A1").Value = "" Then
     DIWorkbook.Sheets(1).Range("I1").Value = "Duplicate File?"
     DIWorkbook.Sheets(1).Range("J1").Value = "Wrong Dates?"
     DIWorkbook.Sheets(1).Range("K1").Value = "Invalid Filename?"
+    
+    DIWorkbook.Sheets(1).Name = "DI Errors"
+    DIWorkbook.Sheets.Add After:=Excel.Sheets(1)
+    DIWorkbook.Sheets(2).Name = "Errors"
+    DIWorkbook.Sheets.Add After:=Excel.Sheets(2)
+    DIWorkbook.Sheets(3).Name = "File Details"
+    DIWorkbook.Sheets(1).Activate
+    
 End If
 
     Dim DuplicateFile As Boolean
@@ -153,6 +161,7 @@ End If
                 Case "FED": FileName = "Federal Way.txt": AvgSize = 38979
                 Case "FWE": FileName = "Federal Way.txt": AvgSize = 38979
                 Case "FWD": FileName = "Federal Way.txt": AvgSize = 38979
+                Case "FW ": FileName = "Federal Way.txt": AvgSize = 38979
                 Case "HAR": FileName = "Harrisville.txt": AvgSize = 125467
                 Case "IDA": FileName = "Idaho Falls.txt": AvgSize = 71727
                 Case "LAS": FileName = "Las Vegas North.txt": AvgSize = 81597
@@ -186,7 +195,7 @@ End If
                 Case "WJR": FileName = "West Jordan.txt": AvgSize = 112998
                 Case "WVL": FileName = "West Valley.txt": AvgSize = 77570
                 Case "WVD": FileName = "West Valley.txt": AvgSize = 77570
-                Case Else: FileName = Left(emailAttachments(i).DisplayName, Len(emailAttachments(i).DisplayName) - 4) & ".txt": AvgSize = 0: InvalidCode = True
+                Case Else: FileName = Left(emailAttachments(i).DisplayName, Len(emailAttachments(i).DisplayName) - 4) & ".txt": AvgSize = 1: InvalidCode = True
             End Select
     
             If Dir(DirectoryPath & FileName) <> "" Then DuplicateFile = True
@@ -265,6 +274,8 @@ NextRow = DIWorkbook.Sheets(1).UsedRange.SpecialCells(xlLastCell).Row + 1
     DIWorkbook.Sheets(1).Columns(8).Style = "Percent"
     
     'Move the email to the DIPayroll Cabinet
+    attachmentEmails(e).UnRead = False
+    
     If processFolder.FolderPath = "\\GSC-DIPayroll@ldschurch.org\Inbox" Then
         attachmentEmails(e).Move myNamespace.Folders("GSC-DIPayroll@ldschurch.org").Folders("Cabinet")
     Else

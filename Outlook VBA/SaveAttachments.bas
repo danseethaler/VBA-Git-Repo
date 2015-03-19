@@ -3,10 +3,10 @@ Option Explicit
 
 Sub SaveAttachments()
 
-    Dim Items, Item, myAttachments, myAttachment As Object
+    Dim items, Item, myAttachments, myAttachment As Object
     Dim myolApp As New Outlook.Application
     Dim myOlExp As Outlook.Explorer
-    Dim Selection As Outlook.Selection
+    Dim selection As Outlook.selection
     Dim Msg As Outlook.MailItem
     Dim FileName As String
     Dim SelectedFolder As Outlook.Folder
@@ -33,7 +33,7 @@ Sub SaveAttachments()
 '    otherObject.Visible = False
 
     Set myOlExp = myolApp.ActiveExplorer
-    Set Selection = myOlExp.Selection
+    Set selection = myOlExp.selection
 
     FileCounter = 1
 
@@ -48,7 +48,7 @@ Sub SaveAttachments()
     otherObject.Quit
     Set otherObject = Nothing
      
-    For Each Item In Selection
+    For Each Item In selection
      Set Msg = Item
      
         Set myAttachments = Item.Attachments
@@ -79,13 +79,13 @@ Sub SaveAttachments()
         
     Next
         
-    Set Items = Nothing
+    Set items = Nothing
     Set Item = Nothing
     Set myAttachments = Nothing
     Set myAttachment = Nothing
     Set myolApp = Nothing
     Set myOlExp = Nothing
-    Set Selection = Nothing
+    Set selection = Nothing
 
     MsgBox (NumberSaved & " PDF attachments have been saved to " & DirectoryPath)
      

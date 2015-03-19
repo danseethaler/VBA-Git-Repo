@@ -4,34 +4,28 @@ Option Explicit
 Public Sub GetAttachments()
 
 Dim Item As MailItem
-Dim Atmt As Attachment
+Dim Atmt As attachment
 Dim FileName As String
-Dim FileCounter As Integer
 Dim QueryCount As Integer
 Dim ValidQueryCount As Integer
 Dim DirectoryPath As String
-Dim FullPath As String
+Dim FileCounter As Integer
 Dim WBookName As String
 Dim WBook As Workbook
 Dim Excel As Excel.Application
-Dim queryEmails As New Collection
+Dim FullPath As String
 
 Dim Namespace As Outlook.Namespace
 Set Namespace = Application.GetNamespace("MAPI")
 
-For Each Item In Namespace.GetDefaultFolder(olFolderInbox).Items
-If Item.Attachments.Count = 1 And Item.SenderName = "GLOBALHR-PeopleSoft" Then
-QueryCount = QueryCount + 1
-queryEmails.Add Item
-End If
+For Each Item In Namespace.GetDefaultFolder(olFolderInbox).items
+If Item.Attachments.Count = 1 And Item.SenderName = "GLOBALHR-PeopleSoft" Then QueryCount = QueryCount + 1
 Next Item
 
 If QueryCount < 1 Then
 Set Namespace = Nothing
 Exit Sub
 End If
-
-QueryCount = 0
 
 DirectoryPath = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\"
 
@@ -62,10 +56,15 @@ DirectoryPath = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\"
         WBook.SaveAs FileName:=DirectoryPath & WBookName, FileFormat:=51
     End If
 
-    Excel.ScreenUpdating = False
+    With Excel
+        .EnableEvents = False
+        .ScreenUpdating = False
+    End With
     
+'*********************************
 'Loop through every email (MailItem) in the primary inbox
-For Each Item In queryEmails
+For Each Item In Namespace.GetDefaultFolder(olFolderInbox).items
+    If Item.Attachments.Count = 1 And Item.SenderName = "GLOBALHR-PeopleSoft" Then
         For Each Atmt In Item.Attachments
             If InStr(UCase(Atmt.DisplayName), ".XLS") > 0 Then
             FileName = Atmt.FileName
@@ -94,11 +93,6 @@ For Each Item In queryEmails
                     Kill FullPath
                 Else
                 Excel.Workbooks(FileName).Sheets(1).Name = Left(FileName, 30)
-                If Left(Item.Subject, 6) = "Output" Then
-                    Excel.Workbooks(FileName).Sheets(1).Range("C1").Value = Item.Body
-                    Else
-                    Excel.Workbooks(FileName).Sheets(1).Range("C1").Value = Item.Subject
-                End If
                 Excel.Workbooks(FileName).Sheets(1).Move After:=Excel.Workbooks(WBookName).Sheets(1)
                 Kill FullPath
                 
@@ -106,20 +100,20 @@ For Each Item In queryEmails
                     
                 End If
             
-            Debug.Print Item.Subject
-            QueryCount = QueryCount + 1
             Item.Delete
         Next
+
+    End If
 Next
 
-If Excel.Workbooks(WBookName).Sheets(1).Name = "Sheet1" Then _
-Excel.Workbooks(WBookName).Sheets(1).Delete
+With Excel
+    .Workbooks(WBookName).Save
+    .Visible = True
+    .EnableEvents = True
+    .ScreenUpdating = True
+End With
 
 MsgBox QueryCount & " backstop query emails have been processed. " & ValidQueryCount & " queries actually had data."
-
-Excel.Workbooks(WBookName).Save
-Excel.Visible = True
-Excel.ScreenUpdating = True
 
 Set Namespace = Nothing
 Set WBook = Nothing
