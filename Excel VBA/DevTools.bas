@@ -1,8 +1,8 @@
 Attribute VB_Name = "DevTools"
 Option Explicit
 
-Public Sub ExportSourceFiles()
-
+Sub ExportModulesForGit(control As IRibbonControl)
+'This subroutine exports all of the modules in the AddIn to be used for GIT
     Dim destPath As String
     Dim component As VBComponent
     Dim project As VBProject
@@ -37,8 +37,8 @@ Private Function ToFileExtension(vbeComponentType As vbext_ComponentType) As Str
      
 End Function
 
-Public Sub RefreshModulesWithGitRepo()
-'Remove all modules
+Sub RefreshModulesWithGitRepo(control As IRibbonControl)
+'Remove all modules then reimport the modules from the GIT repo
     Dim comp As VBComponent
     Dim project As VBProject
     Set project = Application.VBE.VBProjects("PersonalUtilities")
@@ -62,3 +62,16 @@ Public Sub RefreshModulesWithGitRepo()
     Wend
 
 End Sub
+
+Sub ExportCurrentSourceFiles(control As IRibbonControl)
+'This subroutine exports all of the modules in AddIn to be used for GIT
+'TODO: Add the code to export the modules for the current workbook.
+
+End Sub
+
+Sub RefreshCurrentModulesWithGitRepo(control As IRibbonControl)
+'Remove all modules then reimport the modules from the GIT repo
+'TODO: Add the code to refresh the modules for the current workbook.
+
+End Sub
+
