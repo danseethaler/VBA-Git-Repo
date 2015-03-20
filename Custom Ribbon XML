@@ -89,7 +89,7 @@
 	</menu>
 
 	<menu id="Git" size="large" label="Git Repo" imageMso="FileVersionHistory">
-					<button id="ExportSourceFiles" supertip="Export all modules in the Personal Utilities AddIn to the corresponding Git Repo." label="Export Modules to Git Repo" onAction="ExportSourceFiles" imageMso="XmlExport" />
+					<button id="ExportModulesForGit" supertip="Export all modules in the Personal Utilities AddIn to the corresponding Git Repo." label="Export Modules to Git Repo" onAction="ExportModulesForGit" imageMso="XmlExport" />
 					<button id="RefreshModulesWithGitRepo" supertip="This will remove all modules in the Personal Utilities AddIn and replace them with the current modules in the Git Repo." label="Refresh Modules with Git Repo" onAction="RefreshModulesWithGitRepo" imageMso="BulletsAndNumberingBulletsDialog" />
 					<button id="ExportCurrentSourceFiles" supertip="Export all modules in the active workbook to the selected Git Repo." label="Export Current Modules to Git Repo" onAction="ExportCurrentSourceFiles" imageMso="XmlExport" />
 					<button id="RefreshCurrentModulesWithGitRepo" supertip="This will remove all modules in the active workbook and replace them with the current modules in the selected Git Repo." label="Refresh Current Modules with Git Repo" onAction="RefreshCurrentModulesWithGitRepo" imageMso="BulletsAndNumberingBulletsDialog" />
