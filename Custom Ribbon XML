@@ -1,0 +1,125 @@
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui">
+	<ribbon>
+		<tabs>
+			<tab id="customTab" label="UTILITIES" insertBeforeMso="TabHome">
+				<group idMso="GroupClipboard" />
+				<group idMso="GroupNumber" />
+				<group id="ToText" label="PeopleSoft Tools">
+				<splitButton id="splitButton" size="large" >
+<button id="customButton4" supertip="Convert the numeric values in the selected range to six digit EmpIDs stored as text." label="EmpID to Text" onAction="ConvertEmpIDToText" imageMso="ObjectAddText" />
+ <menu id="menu">
+  <button id="customButton8" supertip="Convert the numeric values in the selected range to nine digit SSNs stored as text."  label="SSN to Text" onAction="ConvertSSNToText" imageMso="ObjectAddText" />
+ </menu>
+</splitButton>
+			<button id="customButton7" supertip="Format a PeopleSoft query by removing the top line and inserting a named table." size="large" label="Format Query" onAction="PSTable" imageMso="ConvertTextToTable" />
+					<button id="SettingButton3" supertip="This will autosize all columns in the active workbook with a max width of 35." size="large" label="Autofit Columns" onAction="ColumnsAutofit" imageMso="PageScaleToFitWidth" />
+
+						<separator id="separator" />
+
+					<button id="customButton2" supertip="Convert names in selection from 'Last, First' format to 'First Last' format.&#13;This will also convert the names to proper case." label="Convert Names" onAction="ReverseName" imageMso="PivotTableShowPages" />
+					<button id="customButton1" supertip="Convert all formulas in the given selection to the corresponding values." label="Formulas to Values" onAction="FormulastoValues" imageMso="NameUseInFormula" />
+			<button id="customButton6" supertip="Create an array from the selection that can be used as an list member in a PeopleSoft query. This function will only include unique values.&#13;&#13;TIP: Selecting only the first EmpID in a list will automatically add the first 28 EmpIDs to your list criteria." label="PS List Criteria" onAction="ListCriteria" imageMso="AdvancedFileProperties" />				</group>
+				<group id="QuickTools" label="Quick Tools">
+
+					<button id="customButton25" supertip="Round each value in the selected range to the nearest 2 decimals." label="Round Two" onAction="RoundTwo" imageMso="DecimalsDecrease" />
+					<button id="customButton9" supertip="Paste the copied cells into the selected area and remove the duplicated." label="Paste/Remove" onAction="PasteAndRemoveDuplicates" imageMso="RemoveDuplicates" />
+					<button id="FormatCharts" supertip="Format the charts in the active workbook." onAction="FormatCharts" imageMso="ChartChangeType" />
+					<button id="RoundCommaStyle" imageMso="CommaStyle" onAction="RoundCommaStyle" />
+					<button id="RemoveDatesAndExtendtions" imageMso="ObjectAlignMenu" onAction="RemoveDatesAndExtendtions" />
+					<menu idMso="SortFilterMenu" size="large" />
+					<menu idMso="SelectMenuExcel" size="large">
+					<button id="GoToBlanks" supertip="Go To Blanks" insertAfterMso="GoToFormulas" label="Blanks" onAction="GoToBlanks" />
+					</menu>
+				</group>
+
+<group id="Reports" label="Advanced Tools">
+
+	<menu id="GenerateEmails" size="large" label="Outlook Toolbelt" imageMso="FileSendMenu" itemSize="large">
+		<button id="AttachToOpenEmail" label="Attach To Open Email" supertip="Attach the active workbook/worksheet to an open email in Outlook. This is helpful when attaching a workbook to a reply or forward email." imageMso="FilePublishExcelServices" onAction="AttachToOpenEmail" />
+		<button id="SendSheet" label="Email Sheet" supertip="Email only the active sheet." imageMso="PivotTableShowPages" onAction="SendSheet" />
+			<menuSeparator id="separator1" />
+		<button id="Email1" label="BiWeekly Time Entry" supertip="Generate an email to all timekeepers indicating that time entry is open for the current pay period. The dates for this email will automatically be set." imageMso="HeaderFooterCurrentTimeInsert" onAction="EmailTimeKeepersTemplate" />
+		<button id="customButton30" supertip="Generate batch emails with personalized data.&#13;&#13;List email addresses in column A.&#13;List other information in other columns with hashtag headers." label="Personal Mass Email" onAction="CreateFromTemplate" imageMso="SendCopySendToMailRecipient" />
+		<button id="ListOutlookItems" label="List Outlook Items" supertip="Select an Outlook folder and all the emails in the folder will be listed on the active workbook." imageMso="AlignLeft" onAction="ListOutlookItems" />
+		<button id="EmailMissingDIFiles" label="Email Missing DI Stores" supertip="Generate an email to each of the DI stores who have not yet submitted a Time America file for the pay period you're processing." imageMso="FileSendMenu" onAction="EmailMissingDIStores" />
+		<button id="TimeAmericaErrorReport" label="TA Error Report" supertip="Generate an email to all DI stores with a list of errors from the Time America upload." imageMso="FileSendMenu" onAction="TimeAmericaErrorReport" />
+	</menu>
+
+	<menu id="SQLCreation" size="large" label="SQL Creation" imageMso="AlignLeft">
+			<button id="SQLCreate" supertip="Create an CREATE TABLE statement from the data in the active sheet." label="SQl CREATE" onAction="CreateSQLTable" imageMso="PivotTableSelectLabel"/>
+			<button id="SQLInsert" supertip="Create an INSERT statement from the data in the active sheet." label="SQl Insert" onAction="InsertSQL" imageMso="PivotTableSelectLabelAndData"/>
+			<button id="CreateSelect" supertip="Create a Select statement from the data in the active sheet." label="SQl Select" onAction="CreateSelect" imageMso="AlignLeft"/>
+			<button id="CreateDecoder" supertip="Take the selected cells and create a DECODE SQL statement." label="Create SQL Decoder" onAction="CreateDecoder" imageMso="TextBoxInsertHorizontal" />
+			<button id="ToDate" supertip="Generate ToDate statement." label="ToDate" onAction="ToDate" imageMso="HeaderFooterCurrentDate" />
+	</menu>
+
+	<menu id="Explorer" label="Explorer Tools" imageMso="ObjectAddText" size="large">
+		<button id="ShowDirectoryItems" imageMso="ExchangeFolder" label="List Directory" supertip="List all items in a directory path under the active cell." onAction="ShowDirectoryItems"/>
+		<button id="MergeFiles" label="Merge Text Files" supertip="Select a folder and merge all text files in the folder into a single master file. The original files will remain unchanged." imageMso="FileCheckIn" onAction="AppendFiles" />
+		<button id="ImportExternalTimeFile" imageMso="ObjectEditText" label="Import External Time File" supertip="Create a new tab and import all external time files in a folder of  your choice." onAction="ImportExternalTimeFile"/>
+	</menu>
+		<button id="QuickSaveDesktop" supertip="Quickly save a copy of the active workbook to your desktop." size="large" label="Save to Desktop" onAction="QuickSaveDesktop" imageMso="FileSave" />
+		<button id="KillWorkbook" supertip="Save and close active workbook." size="large" label="Save/Close" onAction="KillWorkbook" imageMso="InkToolsClose" />
+					<splitButton id="splitVBA" size="large" >
+						<button idMso="VisualBasic" />
+					<menu id="VBAMenu">
+						<button idMso="MacroRecord" />
+						<button idMso="AddInManager" />
+					</menu>
+					</splitButton>
+	<button id="SettingsButton2" supertip="Show/Hide the small green triangles on cells containing an error message." label="Hide Errors" onAction="HideError" imageMso="TraceError" />
+
+	<menu id="FormatReports" label="Format Reports" imageMso="PivotTableLayoutReportLayout">
+		<button id="b1" label="Format ALP Report" supertip="Format the ALP report to show only a single line for each employee." onAction="FormatPSALP" />
+		<button id="b2" label="Summarize TRC Report" supertip="Summarize the TRC report on the active sheet. Only the total hours and EmpIDs will remain." onAction="SummarizeTRCReport" />
+		<button id="b3" label="Online Check Report" supertip="Format the Online Check Report to show only a single line for each check." onAction="OnlineCheckReport" />
+		<button id="b4" label="Online Check Report (TRC)" supertip="Format the Online Check Report with check number and name on each line. This will preserve the earnings codes and hours for each check." onAction="OnlineCheckReportwithTRC" />
+		<button id="b5" label="Gold's Gym Summary" supertip="Summarize the Gold's Gym Report from process PAY001 to prepare for the Gold's Gym representative." onAction="GoldsGymReport" />
+
+	</menu>
+
+	<menu id="Miscellaneous" label="Miscellaneous" imageMso="ObjectShadowColorMoreColorsDialog">
+					<button id="ShowDuplicates" supertip="Conditional Formatting -- Show duplicates in the selected range." label="Show Duplicates" onAction="ShowDuplicates" imageMso="ConditionalFormattingHighlightDuplicateValues" />
+					<button id="SectionData" supertip="Insert a row in between each cell with different values." label="Section Data" onAction="SectionData" imageMso="PageBreakInsertOrRemove" />
+					<button id="CountDuplicates" supertip="Count the number of unique values in the selection." label="Count Duplicates" onAction="CountDuplicates" imageMso="BulletsAndNumberingBulletsDialog" />
+					<button id="customButton15" supertip="Convert numeric cells with trailing negatives to negative values." label="Reverse Negative" onAction="SwapTrailingNegative" imageMso="SpeakByRows" />
+					<button id="RemoveTrailingSpaces" supertip="Remove the trailing spaces from the constants within your selection. This can help validate data." label="Remove Trailing Spaces" onAction="RemoveTrailingSpaces" imageMso="ViewRulerExcel" />
+					<button id="SettingsButton1" supertip="Toggle the formula notation style from 'A1' to 'R1C1'. &#13;&#13;When 'R1C1' is active the column headers will be listed as numbers rather than letters." label="R1C1 Toggle" onAction="RCToggle" imageMso="SplitCells" />
+					<button id="customButton5" supertip="Close the active workbook and reopen it without saving. &#13;This can be useful when testing code or when you want to restore your workbook to the last saved state." label="Revert Changes" onAction="ReopenUnsavedWorkbook" imageMso="FileClose" />
+	</menu>
+
+</group>
+
+<group idMso="GroupFont" />
+
+			</tab>
+		</tabs>
+	</ribbon>
+
+<contextMenus>
+	<contextMenu idMso="ContextMenuCell">
+	<menu id="ExplorerExtention" label="Explorer Tools" insertAfterMso="Copy">
+		<button id="TexttoFormula" label="Text to Formula"  onAction="Texttoformula" imageMso="ViewFormulaBar"/>
+		<button id="customButton20" supertip="Paste the copied data into the spreadhseet and deliminate with commas." label="Paste/Del (Commas)" onAction="PasteAndDeliminateComma" imageMso="CommaStyle" />
+		<button id="customButton21" supertip="Paste the copied data into the spreadhseet and deliminate with spaces." label="Paste/Del (Spaces)" onAction="PasteAndDeliminateSpace" imageMso="ArrowsMore" />
+		<button id="customButton22" supertip="This tool will take the data in the left columns of the selection and concatenate each cell into the further right column of the active selection." label="Concat Delimited Text" onAction="ConcatenateDelimitedText" imageMso="PivotTableBlankRowsInsert" />
+		<button id="Trim" label="Trim Text"  onAction="Trimed" imageMso="AlignLeft"/>
+		<button id="CopySum" label="Copy Sum"  onAction="CopySum" imageMso="AutoSum"/>
+	</menu>
+	<menu idMso="ConditionalFormattingMenu" insertAfterMso="Copy"/>
+	</contextMenu>
+	<contextMenu idMso="ContextMenuPivotTable">
+		<button id="ConvertPivot" label="Normalize Pivot Data"  onAction="ConvertPivot" insertBeforeMso="Refresh" imageMso="TableConvertToRange"/>
+	</contextMenu>
+	<contextMenu idMso="ContextMenuWorkbookPly">
+		<button id="DeleteSheetNow" label="Delete Now"  onAction="DeleteSheet" insertBeforeMso="SelectAllSheets" imageMso="InkToolsClose"/>
+	</contextMenu>
+	<contextMenu idMso="ContextMenuColumn">
+		<button id="ConvertPhoneNumbers" label="Normalize Phone Numbers"  onAction="ConvertPhoneNumbers" insertAfterMso="Copy" imageMso="TextBoxInsertExcel"/>
+		<button id="RemoveDates" supertip="Remove dates and .txt extensions from selected column." label="Remove Dates"  onAction="RemoveDates" insertAfterMso="Copy" imageMso="TextBoxInsertExcel"/>	</contextMenu>
+	<contextMenu idMso="ContextMenuRow">
+		<button id="ProperCase" label="Proper Case"  onAction="ProperCase" insertAfterMso="Copy" imageMso="TextBoxInsertExcel"/>
+	</contextMenu>
+</contextMenus>
+
+</customUI>
