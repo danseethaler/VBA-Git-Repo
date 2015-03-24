@@ -1,5 +1,6 @@
 Attribute VB_Name = "FormatReports"
 Option Explicit
+'These macros format reports exported from PS
 
 Sub SummarizeTRCReport(control As IRibbonControl)
 Dim Cancel As String
