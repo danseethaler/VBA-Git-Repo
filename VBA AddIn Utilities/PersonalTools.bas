@@ -111,7 +111,12 @@ Set outApp = Nothing
 
 End Sub
 
-Sub AppendFiles(control As IRibbonControl) '
+Sub AppendFiles() 'control As IRibbonControl
+'This macro will aggregate all the files with extension .txt in the selected folder
+'into a new file. This is used to aggregate the external time files from Time America
+'into a single file that can be uploaded a single time rather than uploading dozens
+'of seperate files. All original files remain unaltered.
+
 Dim SourceNum As Integer
 Dim DestNum As Integer, FileCount As Long
 Dim Temp As String, DirectoryPath As String
@@ -120,11 +125,13 @@ Dim AggFile As String
 Dim AddName As String
 Dim FMACounter As Integer
 
+'Determine the filename for the new file.
 AggFile = InputBox("Please provide a name for the aggregated file.", "File Name") & ".txt"
 
-If AggFile = ".txt" Then GoTo EndEarly
+'If the user did not type anything in for a filename then the macro will terminate
+If AggFile = ".txt" Then Exit Sub
 
-'Identify the folder that contains the files to merge
+'Ask the user for the folder that contains the files to merge
     With Application.FileDialog(msoFileDialogFolderPicker)
         Select Case Dir("\\L12239\CXFUSR\Appl\HR800\PS\Temp\GSC\", vbDirectory)
         Case "": .InitialFileName = "C:\Users\danseethaler\Dropbox\Shared\Macros\DI Time Comparison\TXT Files\"
@@ -132,16 +139,26 @@ If AggFile = ".txt" Then GoTo EndEarly
         End Select
         .Title = "Select the folder with texts files to merge."
         .Show
-        
+    
+    'If no folder is selected then terminate the macro.
+    'Otherwise set the DirectoryPath variable equal to the path of the selected folder.
     Select Case .SelectedItems.Count
-        Case Is = 0: GoTo EndEarly
+        Case Is = 0: Exit Sub
         Case Is = 1: DirectoryPath = .SelectedItems(1) & "\"
     End Select
     
     End With
-    
-AddName = MsgBox("Do you want to append the file name to each line of data?", vbYesNo)
-    
+
+'Ask the user if they would like the filename appended to each line of data.
+'This is used to determine which line of data goes with which file.
+'You should choose No when preparing the data to load into PeopleSoft.
+'Select Yes if the data has been loaded and you're appending the files a second time for comparison purposes.
+Dim config As Integer
+config = vbYesNoCancel + vbDefaultButton2
+AddName = MsgBox("Do you want to append the file name to each line of data?", config)
+
+If AddName = vbCancel Then Exit Sub
+
     FileName = Dir(DirectoryPath, vbReadOnly) ' + vbHidden)
     
 Application.ScreenUpdating = False
@@ -157,42 +174,50 @@ Do While FileName <> ""
       SourceNum = FreeFile()
       Open DirectoryPath & FileName For Input As SourceNum
 
-      ' Include the following line if the first line of the source
-      ' file is a header row that you do now want to append to the
-      ' destination file:
-      ' Line Input #SourceNum, Temp
-
-      ' Read each line of the source file and append it to the
-      ' destination file.
+      ' Read each line of the source file and append it to the destination file.
       Do While Not EOF(SourceNum)
-         Line Input #SourceNum, Temp
-         If AddName = vbYes Then
-         Print #DestNum, Temp & "," & FileName
-         Else: Print #DestNum, Temp
-         If InStr(1, Temp, "FMA") Then: FMACounter = FMACounter + 1
-         End If
-      Loop
-      
-        FileName = Dir
-        FileCount = FileCount + 1
+           Line Input #SourceNum, Temp
+           
+           'If we need to append the filename to the line then do it.
+           If AddName = vbYes Then
+           Print #DestNum, Temp & "," & Left(FileName, Len(FileName) - 4)
+           
+           'Otherwise just add the source line to the destination file.
+           Else: Print #DestNum, Temp
+           End If
+           
+           'Check if the line has FML reported (a common error in DI Files)
+           'We used to contact the store about this before we loaded the file
+           'Now we simply delete this error on the PeopleSoft error page in the
+           'run control and let the store send an email to update the timesheet if needed.
+           If InStr(1, Temp, "FMA") Then: FMACounter = FMACounter + 1
+           
+        Loop
         
+        'Get the next file in the directory an increase the number of files processed by one.
+          FileName = Dir
+          FileCount = FileCount + 1
+        
+      'Close the files we've been using. The new file will be opened in the next loop.
       Close #DestNum
       Close #SourceNum
-      
+    
+    'If the file does not have a .txt extension then move onto the next file.
     Else: FileName = Dir
 
     End If
         
     Loop
 
-EndEarly:
-
+'Reset the status bar and begin updating the screen again.
 Application.ScreenUpdating = True
 Application.StatusBar = False
 
+'Send a message box to the user indicating what happend in the macro.
     MsgBox FileCount & " file(s) have been aggregated into the " & Chr(34) & AggFile & Chr(34) & " file."
     If FMACounter > 0 Then: MsgBox ("There are " & FMACounter & " lines that contain the FMA TRC. Please contact " & _
     "the store to resolve this.")
+    
 End Sub
 
 Sub ConcatenateDelimitedText(control As IRibbonControl) '
@@ -331,11 +356,19 @@ Application.ScreenUpdating = True
 End Sub
 
 Sub ImportExternalTimeFile(control As IRibbonControl)
+'This macro will import all the files in a given directory into a new workbook
+'in Excel. The files will be imported based on the static filed sizes designated
+'for all external files using the PeopleSoft "Upload Process". This is all files
+'except for Time America files.
+
+'This is a useful tool for validating files loads and reviewing time in the
+'external time files.
 Dim DirectoryPath As String
 Dim FileName As String
 
+'Allow the user to select the directory with the files
 With Application.FileDialog(msoFileDialogFolderPicker)
-        .InitialFileName = CreateObject("WScript.Shell").SpecialFolders("Desktop")
+        .InitialFileName = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\"
         .Title = "Select the folder with external time files."
         .Show
         
@@ -348,6 +381,7 @@ End With
 
 Application.ScreenUpdating = False
 
+'Add a new sheet to the current workbook.
 Sheets.Add
 
 'Set headers
@@ -368,81 +402,82 @@ Sheets.Add
 
 Range("B2").Select
 
+'Iterate through the files
 FileName = Dir(DirectoryPath, vbReadOnly) ' + vbHidden)
 
     Do While FileName <> ""
 
-If UCase(Right(FileName, 4)) = ".TXT" Or UCase(Right(FileName, 4)) = ".DAT" Then
-    
-    With ActiveSheet.QueryTables.Add(Connection:= _
-        "TEXT;" & DirectoryPath & FileName _
-        , Destination:=Range(ActiveCell.Address))
-        '.CommandType = 0
-        .Name = Left(FileName, Len(FileName) - 4)
-        .FieldNames = True
-        .RowNumbers = False
-        .FillAdjacentFormulas = False
-        .PreserveFormatting = True
-        .RefreshOnFileOpen = False
-        .RefreshStyle = xlInsertDeleteCells
-        .SavePassword = False
-        .SaveData = True
-        .AdjustColumnWidth = True
-        .RefreshPeriod = 0
-        .TextFilePromptOnRefresh = False
-        .TextFilePlatform = 437
-        .TextFileStartRow = 1
-        .TextFileParseType = xlFixedWidth
-        .TextFileTextQualifier = xlTextQualifierDoubleQuote
-        .TextFileConsecutiveDelimiter = False
-        .TextFileTabDelimiter = True
-        .TextFileSemicolonDelimiter = False
-        .TextFileCommaDelimiter = False
-        .TextFileSpaceDelimiter = False
+        If UCase(Right(FileName, 4)) = ".TXT" Or UCase(Right(FileName, 4)) = ".DAT" Then
         
-            'List of fields from external time files.
-            '$emplid:11 $emplrcd:3 $reportdate:10 $trc:5 $hours:6 $amt:8 $profile:1 $business_unit:5 $deptid:10
-            '$account:6 $product:6 $project_id:15 $business_unit_pc:5 $activity_id:15 $resource_type:5
-            '$resource_cat:5 $resource_sub_cat:5
-            
-        .TextFileColumnDataTypes = Array(1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-        .TextFileFixedColumnWidths = Array(11, 3, 10, 5, 6, 8, 1, 5, 10, 6, 6, 15, 5, 15, 5, 5, 5)
-        .TextFileTrailingMinusNumbers = True
-        .Refresh BackgroundQuery:=False
-    End With
-
-Range(ActiveCell.Offset(0, -1).Address, ActiveCell.End(xlDown).Offset(0, -1)) = Left(FileName, Len(FileName) - 4)
-
-Range("B" & ActiveSheet.UsedRange.SpecialCells(xlLastCell).Row + 1).Select
-
-End If
+            'Import the files using delimination specific to the file format.
+            With ActiveSheet.QueryTables.Add(Connection:= _
+                "TEXT;" & DirectoryPath & FileName _
+                , Destination:=Range(ActiveCell.Address))
+                .Name = Left(FileName, Len(FileName) - 4)
+                .FieldNames = True
+                .RowNumbers = False
+                .FillAdjacentFormulas = False
+                .PreserveFormatting = True
+                .RefreshOnFileOpen = False
+                .RefreshStyle = xlInsertDeleteCells
+                .SavePassword = False
+                .SaveData = True
+                .AdjustColumnWidth = True
+                .RefreshPeriod = 0
+                .TextFilePromptOnRefresh = False
+                .TextFilePlatform = 437
+                .TextFileStartRow = 1
+                .TextFileParseType = xlFixedWidth
+                .TextFileTextQualifier = xlTextQualifierDoubleQuote
+                .TextFileConsecutiveDelimiter = False
+                .TextFileTabDelimiter = True
+                .TextFileSemicolonDelimiter = False
+                .TextFileCommaDelimiter = False
+                .TextFileSpaceDelimiter = False
+                
+                'List of field names and sizes that all external time files with this file format adhear to:
+                
+                '$emplid:11 $emplrcd:3 $reportdate:10 $trc:5 $hours:6 $amt:8 $profile:1 $business_unit:5 $deptid:10
+                '$account:6 $product:6 $project_id:15 $business_unit_pc:5 $activity_id:15 $resource_type:5
+                '$resource_cat:5 $resource_sub_cat:5
+                    
+                .TextFileColumnDataTypes = Array(1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+                .TextFileFixedColumnWidths = Array(11, 3, 10, 5, 6, 8, 1, 5, 10, 6, 6, 15, 5, 15, 5, 5, 5)
+                .TextFileTrailingMinusNumbers = True
+                .Refresh BackgroundQuery:=False
+            End With
+        
+        'Set the values of the cells in column A equal to the source filename.
+        Range(ActiveCell.Offset(0, -1).Address, ActiveCell.End(xlDown).Offset(0, -1)) = Left(FileName, Len(FileName) - 4)
+        
+        'Change the active cell to be the next available cell.
+        Range("B" & ActiveSheet.UsedRange.SpecialCells(xlLastCell).Row + 1).Select
+        
+        End If
 
 FileName = Dir
 
 Loop
 
+'Copy all the data and add it to a new sheet to remove the data connections.
     Range("A1").CurrentRegion.Copy
     Sheets.Add
     Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
         :=False, Transpose:=False
-    
+
+'Delete the original worksheet.
     Application.DisplayAlerts = False
     Sheets(ActiveSheet.Index + 1).Delete
     Application.DisplayAlerts = True
     
-'Call ConvertEmpIDToTextCall(Range("B:B"))
-
-Columns("D:D").NumberFormat = "m/d/yyyy"
-ActiveSheet.Name = "External Files PP" & InputBox("What is the two digit pay period?")
-
-Range("O:O").Delete
-Range("O:O").Delete
-Range("O:O").Delete
-Range("O:O").Delete
-
-Columns.AutoFit
-
+'Do some formatting and move the worksheet to it's own workbook.
+    Columns("D:D").NumberFormat = "m/d/yyyy"
+    ActiveSheet.Name = "External Files PP" & RecentPP()
+    Columns.AutoFit
     Range("A1").Select
+    ActiveSheet.Move
+
+Application.ScreenUpdating = True
 
 End Sub
 
