@@ -9,7 +9,7 @@ Sub ExportModulesForGit(control As IRibbonControl)
     
     Set project = Application.VBE.VBProjects("PersonalUtilities")
     
-    destPath = "C:\Users\danseethaler\Documents\GitHub\VBA-Git-Repo\Excel VBA\"
+    destPath = "C:\Users\danseethaler\Documents\GitHub\VBA-Git-Repo\VBA AddIn Utilities\"
     
     For Each component In project.VBComponents
         If component.Type = vbext_ct_ClassModule Or component.Type = vbext_ct_StdModule Then

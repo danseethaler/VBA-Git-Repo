@@ -3,7 +3,11 @@
 ###################
 *.xlsm
 *.xlam
+*.xlsx
 *.accdb
 *.accde
 *.accdr
 *.laccdb
+*.pdf
+*.pptx
+*.docx

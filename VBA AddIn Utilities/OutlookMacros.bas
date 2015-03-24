@@ -282,8 +282,11 @@ Set Outlook = Nothing
 End Sub
 
 Sub TimeAmericaErrorReport(control As IRibbonControl)
+'This macro is used to generate an email which notifies the DI stores of
+'errors generated when uploading the Time America file from their store.
+
     Dim Cell As Range
-    Dim myOlApp As Outlook.Application
+    Dim Outlook As Outlook.Application
     Dim MyItem As Outlook.MailItem
     Dim ItemsSent As Integer
     Dim EmailAction As String
@@ -291,81 +294,84 @@ Sub TimeAmericaErrorReport(control As IRibbonControl)
     Dim Continue As String
     Dim Header As Range
     Dim Preview As String
-    Dim Outlook As Object
     Dim AttachWorkbook As String
     Dim Stores As String
     Dim MissingStores As String
-    Dim PP As String
     
     'Make sure Outlook is open.
     On Error Resume Next
     Set Outlook = GetObject(, "Outlook.Application")
     On Error GoTo 0
-
+    
+    'If Outlook is not open then open it.
     If Outlook Is Nothing Then
-        MsgBox "Please open Microsoft Outlook before running this program."
+        Set Outlook = CreateObject("Outlook.Application")
+    End If
+    
+    'Set the Email Template string variable equal to the directory of the Outlook email template
+    EmailTemplate = "\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\TA100 Uploads Template.oft"
+    
+    'Range("A2") should have the storename associated with that error in it.
+    'If not the macro will exit.
+    If IsEmpty(Range("A2")) Then
+        MsgBox "There is not a Store Name in cell A2. Please update the error report and rerun the macro."
         Exit Sub
     End If
-
-    If Dir("\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\TA100 Uploads Template.oft") <> "" Then
-            EmailTemplate = "\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\TA100 Uploads Template.oft"
-        ElseIf Dir("C:\Users\danseethaler\Dropbox\Work\Macros\DI Time Comparison\TA100 Uploads Template.oft") <> "" Then
-            EmailTemplate = "C:\Users\danseethaler\Dropbox\Work\Macros\DI Time Comparison\TA100 Uploads Template.oft"
-        Else: EmailTemplate = "C:\Users\danseethaler\Dropbox\Shared at Work\Macros\DI Time Comparison\TA100 Uploads Template.oft"
-    End If
     
-    If IsEmpty(Range("A2")) Then Exit Sub
-    
-    PP = InputBox("Please enter the two digit pay period.", "Pay Period")
-    
+    'Remove any formulas in column A.
     Range("A:A").Value = Range("A:A").Value
     
+    'Save the workbook.
     ActiveWorkbook.Save
     
+    'Copy the worksheet with the errors
     Application.ActiveSheet.Copy
-    ActiveWorkbook.SaveAs (CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\PP" & PP & " Load Errors")
+    ActiveWorkbook.SaveAs (CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\PP" & RecentPP() & " Load Errors")
 
+    'Iterate through the error stores and generate a list of store names with errors on their file upload.
     For Each Cell In Range("A2:A" & Range("A1").End(xlDown).Row)
-
         If Not IsEmpty(Cell) And InStr(1, Stores, Cell) = 0 Then
             Stores = Stores & Cell.Value & "<br>"
         End If
-    
     Next Cell
     
     'This line creates the Outlook mail object and assigns it to the designated template.
-    Set myOlApp = CreateObject("Outlook.Application")
-    'ACTION: Add File Picker to this section
-    Set MyItem = myOlApp.CreateItemFromTemplate(EmailTemplate)
+    Set MyItem = Outlook.CreateItemFromTemplate(EmailTemplate)
     
-    'This section manipulates several of the properties of the template to insert
-    'the information on the row the program is processing.
-    
+    'This section manipulates several of the properties of the email template to insert
+    'the information from the worksheet into the email.
     With MyItem
         .Attachments.Add ActiveWorkbook.FullName
         .To = "DL-WEL-DIStaff"
         .CC = "danseethaler@ldschurch.org;awilkins@ldschurch.org;DL-GSC-PrcSvc-PR-EmployeeData@ldschurch.org"
         .BCC = ""
-        .Subject = .Subject & PP
+        .Subject = .Subject & RecentPP()
         .HTMLBody = Replace(MyItem.HTMLBody, "#Stores", Stores)
         .Display
     End With
     
+    'Close and delete the workbook.
     Application.ActiveWorkbook.Close
-    
-    Kill (CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\PP" & PP & " Load Errors.xlsx")
+    Kill (CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\PP" & RecentPP() & " Load Errors.xlsx")
 
+'Remind the operator to run the Employee Time by TRC report to catch further upload errors.
 MsgBox ("Please run the employee time by TRC report and make corrections to errors.")
 
 End Sub
 
-Sub EmailMissingDIStores(control As IRibbonControl)
+Sub MissingDIFiles(control As IRibbonControl)
+'This macro generates a dictionary object that is used to validate all DI stores
+'have submitted their Time America file and it is ready to process.
+'The output of this macro is an email to the stores who have not yet sent us their
+'Time America file.
+'The email addresses listed in the dictionary below need to be manually updated as needed.
+
     Dim ToList As String
     Dim DirectoryPath As String
     Dim FileName As String
     Dim Cell As Range
     Dim i As Integer
-    Dim myOlApp As Outlook.Application
+    Dim Outlook As Outlook.Application
     Dim MyItem As Outlook.MailItem
     
     Dim clipboard As MSForms.DataObject
@@ -425,27 +431,43 @@ End With
 
     FileName = Dir(DirectoryPath)
     Do While FileName <> ""
+        'Remove the Store Name/File Name from the dictionary
         If Stores.Exists(Left(FileName, InStrRev(FileName, ".") - 1)) Then
             Stores.Remove Left(FileName, InStrRev(FileName, ".") - 1)
         Else
+            'If the filename does not match a dictionary member a message is generated to the user.
             MsgBox "Filename " & FileName & " does not match a member of the stores dictionary."
         End If
         
         FileName = Dir
     Loop
 
+    'Iterate through the remaining dictionary keys and add the associated email addresses to the ToList string variable.
     For Each strKey In Stores.Keys()
         ToList = ToList & Stores(strKey) & ";"
     Next
     
+    'If all dictionary keys have been removed then we can safely say all files are ready to load.
     If Stores.Count = 0 Then
         MsgBox "All DI files have been received."
         Exit Sub
     End If
 
-    Set myOlApp = CreateObject("Outlook.Application")
-    Set MyItem = myOlApp.CreateItemFromTemplate("\\chqpvun0066\finusr\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\DI TA100 Missing.oft")
     
+    'Make sure Outlook is open.
+    On Error Resume Next
+    Set Outlook = GetObject(, "Outlook.Application")
+    On Error GoTo 0
+    
+    'If Outlook is not open then open it.
+    If Outlook Is Nothing Then
+        Set Outlook = CreateObject("Outlook.Application")
+    End If
+    
+    'Create the email template from the specified directory path
+    Set MyItem = Outlook.CreateItemFromTemplate("\\chqpvun0066\finusr\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\DI TA100 Missing.oft")
+    
+    'Update the email with information from the macro and display the email.
     With MyItem
         .To = ToList
         .CC = "danseethaler@ldschurch.org;awilkins@ldschurch.org;"

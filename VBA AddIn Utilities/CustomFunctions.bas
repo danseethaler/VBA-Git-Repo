@@ -454,11 +454,13 @@ Function CountCellsByColor(rData As Range, cellRefColor As Range) As Long
     CountCellsByColor = cntRes
 End Function
 
-
 Public Function RecentPP() As Integer
+'This function returns the most recently completed pay period number as an integer.
+
 Dim PP01 As Date
 Dim lastPPEndDate As Date
 
+'Determine the most recent PP end date based on a static date in the past
 lastPPEndDate = Date - (Date - CDate("8/15/2014")) Mod 14
 
 'Determine the PPEnd date for PP01 of the current year
@@ -467,6 +469,8 @@ Do Until Year(PP01 + 7) = Year(Date)
     PP01 = PP01 + 14
 Loop
 
+'If the first PP end date this year is after the current date then we assume the most recent PP
+'is pay period 26.
 If PP01 >= Date Then
     RecentPP = 26
     Exit Function

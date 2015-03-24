@@ -1,0 +1,34 @@
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui">
+	<ribbon>
+		<tabs>
+			<tab idMso="TabDeveloper">
+				<group id="ToText" label="PeopleSoft Tools">
+				<splitButton id="splitButton" size="large" >
+<button id="customButton4" supertip="Convert the numeric values in the selected range to six digit EmpIDs stored as text." label="EmpID to Text" onAction="ConvertEmpIDToText" imageMso="ObjectAddText" />
+ <menu id="menu">
+  <button id="customButton8" supertip="Convert the numeric values in the selected range to nine digit SSNs stored as text."  label="SSN to Text" onAction="ConvertSSNToText" imageMso="ObjectAddText" />
+ </menu>
+</splitButton>
+			<button id="customButton7" supertip="Format a PeopleSoft query by removing the top line and inserting a named table." size="large" label="Format Query" onAction="PSTable" imageMso="ConvertTextToTable" />
+
+						<separator id="separator" />
+
+					<button id="customButton1" supertip="Convert all formulas in the given selection to the corresponding values." label="Formulas to Values" onAction="FormulastoValues" imageMso="NameUseInFormula" />
+					<button id="SettingButton3" supertip="This will autosize all columns in the active workbook with a max width of 35." label="Autofit Columns" onAction="ColumnsAutofit" imageMso="PageScaleToFitWidth" />
+			<button id="customButton6" supertip="Create an array from the selection that can be used as an list member in a PeopleSoft query. This function will only include unique values.&#13;&#13;TIP: Selecting only the first EmpID in a list will automatically add the first 28 EmpIDs to your list criteria." label="PS List Criteria" onAction="ListCriteria" imageMso="AdvancedFileProperties" />
+		</group>
+				<group id="QuickTools" label="Quick Tools">
+					<button id="CreateDecoder" supertip="Take the selected cells and create a DECODE SQL statement." label="Create SQL Decoder" onAction="CreateDecoder" imageMso="TextBoxInsertHorizontal" />
+					<button id="customButton9" supertip="Paste the copied cells into the selected area and remove the duplicated." label="Paste/Remove" onAction="PasteAndRemoveDuplicates" imageMso="RemoveDuplicates" />
+	<menu id="FormatReports" label="Format Reports" imageMso="PivotTableLayoutReportLayout">
+		<button id="b5" label="Gold's Gym Summary" supertip="Summarize the Gold's Gym Report from process PAY001 to prepare for the Gold's Gym representative." onAction="GoldsGymReport" />
+		<button id="b1" label="Format ALP Report" supertip="Format the ALP report to show only a single line for each employee." onAction="FormatPSALP" />
+		<button id="b4" label="Online Check Report (TRC)" supertip="Format the Online Check Report with check number and name on each line. This will preserve the earnings codes and hours for each check." onAction="OnlineCheckReportwithTRC" />
+	</menu>
+	</group>
+
+			</tab>
+		</tabs>
+	</ribbon>
+
+</customUI>
