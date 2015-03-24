@@ -10,9 +10,15 @@ Sub ExportModulesForGit(control As IRibbonControl)
     Dim project As VBProject
 
     Set project = Application.VBE.VBProjects("PersonalUtilities")
+<<<<<<< HEAD
 
     destPath = "C:\Users\danseethaler\Documents\GitHub\VBA-Git-Repo\VBA AddIn Utilities\"
 
+=======
+    
+    destPath = "C:\Users\danseethaler\Documents\GitHub\VBA-Git-Repo\VBA AddIn Utilities\"
+    
+>>>>>>> f96d3e3d05d742e6e7738ad20cb87b99d357d167
     For Each component In project.VBComponents
         If component.Type = vbext_ct_ClassModule Or component.Type = vbext_ct_StdModule Then
             component.Export destPath & component.Name & ToFileExtension(component.Type)
