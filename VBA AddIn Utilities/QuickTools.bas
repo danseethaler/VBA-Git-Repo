@@ -306,6 +306,7 @@ End Sub
 
 Sub ListCriteria(control As IRibbonControl)
 
+Dim convertEmpIDs As String
 Dim workRange As Range
 Dim cell As Range
 Dim List As String
@@ -330,7 +331,17 @@ For Each cell In workRange
     
         cell = Replace(cell, " ", "")
         
-        If Len(cell) < 6 Then cell = numberToEmpID(cell)
+        'Determine if the cell is not in a PS EmpID format.
+        'If not, ask the user if the cell should be converted to an EmpID format
+        If Len(cell) < 6 Or cell.NumberFormat <> "@" Then
+            
+            If convertEmpIDs = "" Then
+                convertEmpIDs = MsgBox("Convert EmpIDs to text?", vbYesNo)
+            End If
+            
+            If convertEmpIDs = vbYes Then cell = formatEmpID(cell)
+        
+        End If
     
         If Len(List & cell.Value) <= 255 Then
         
@@ -366,7 +377,7 @@ MsgBox ("This list has been copied to your clipboard." & vbNewLine & vbNewLine &
 
 End Sub
 
-Private Function numberToEmpID(cell As Range) As Range
+Private Function formatEmpID(cell As Range) As Range
 
 If IsNumeric(cell) Then
 
@@ -388,7 +399,7 @@ If IsNumeric(cell) Then
 
 End If
 
-Set numberToEmpID = cell
+Set formatEmpID = cell
 
 End Function
 
