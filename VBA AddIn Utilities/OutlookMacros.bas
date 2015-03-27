@@ -92,7 +92,7 @@ Call ColumnsAutofitCall
 End Sub
 
 Sub CreateFromTemplate(control As IRibbonControl) '
-    Dim Cell As Range
+    Dim cell As Range
     Dim myOlApp As Outlook.Application
     Dim MyItem As Outlook.MailItem
     Dim ItemsSent As Integer
@@ -129,13 +129,13 @@ Sub CreateFromTemplate(control As IRibbonControl) '
     Exit Sub
     End If
     
-    For Each Cell In Range("A2:A" & Range("A1").End(xlDown).Row)
-        If Cell.Value Like "?*@?*.?*" Then
+    For Each cell In Range("A2:A" & Range("A1").End(xlDown).Row)
+        If cell.Value Like "?*@?*.?*" Then
         Else
-        MsgBox ("Please enter valid email addresses into " & Cell.Address)
+        MsgBox ("Please enter valid email addresses into " & cell.Address)
         Exit Sub
         End If
-    Next Cell
+    Next cell
     
     'Confirm the start of the program and determine if emails will be sent or saved.
     EmailAction = MsgBox("Do you want to send the emails?" & vbNewLine & vbNewLine & _
@@ -161,7 +161,7 @@ Sub CreateFromTemplate(control As IRibbonControl) '
     Application.ScreenUpdating = False
     
     'This line begins the loop from row two through the last row with a value in column A.
-    For Each Cell In Range("A2:A" & Range("A1").End(xlDown).Row)
+    For Each cell In Range("A2:A" & Range("A1").End(xlDown).Row)
     
     'This line creates the Outlook mail object and assigns it to the designated template.
     Set myOlApp = CreateObject("Outlook.Application")
@@ -171,11 +171,11 @@ Sub CreateFromTemplate(control As IRibbonControl) '
     'This section manipulates several of the properties of the template to insert
     'the information on the row the program is processing.
     
-    MyItem.To = Cell
+    MyItem.To = cell
     'MyItem.BCC = ""
     
     For Each Header In Range("B1:" & Range("A1").End(xlToRight).Address)
-        MyItem.HTMLBody = Replace(MyItem.HTMLBody, Header, Cell.Offset(0, Header.Column - 1))
+        MyItem.HTMLBody = Replace(MyItem.HTMLBody, Header, cell.Offset(0, Header.Column - 1))
     Next Header
     
     If Preview <> "No" Then
@@ -207,7 +207,7 @@ Sub CreateFromTemplate(control As IRibbonControl) '
     'The ItemsSent variable simply counts the number of emails generated.
     ItemsSent = ItemsSent + 1
     
-    Next Cell
+    Next cell
     
     'Screen updating is turned back on.
     Application.ScreenUpdating = True
@@ -223,7 +223,7 @@ End Sub
 
 Sub EmailTimeKeepersTemplate(control As IRibbonControl)
 
-    Dim Cell As Range
+    Dim cell As Range
     Dim myOlApp As Outlook.Application
     Dim MyItem As Outlook.MailItem
     Dim ItemsSent As Integer
@@ -285,7 +285,7 @@ Sub TimeAmericaErrorReport(control As IRibbonControl)
 'This macro is used to generate an email which notifies the DI stores of
 'errors generated when uploading the Time America file from their store.
 
-    Dim Cell As Range
+    Dim cell As Range
     Dim Outlook As Outlook.Application
     Dim MyItem As Outlook.MailItem
     Dim ItemsSent As Integer
@@ -329,11 +329,11 @@ Sub TimeAmericaErrorReport(control As IRibbonControl)
     ActiveWorkbook.SaveAs (CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\PP" & RecentPP() & " Load Errors")
 
     'Iterate through the error stores and generate a list of store names with errors on their file upload.
-    For Each Cell In Range("A2:A" & Range("A1").End(xlDown).Row)
-        If Not IsEmpty(Cell) And InStr(1, Stores, Cell) = 0 Then
-            Stores = Stores & Cell.Value & "<br>"
+    For Each cell In Range("A2:A" & Range("A1").End(xlDown).Row)
+        If Not IsEmpty(cell) And InStr(1, Stores, cell) = 0 Then
+            Stores = Stores & cell.Value & "<br>"
         End If
-    Next Cell
+    Next cell
     
     'This line creates the Outlook mail object and assigns it to the designated template.
     Set MyItem = Outlook.CreateItemFromTemplate(EmailTemplate)
@@ -369,7 +369,7 @@ Sub MissingDIFiles(control As IRibbonControl)
     Dim ToList As String
     Dim DirectoryPath As String
     Dim FileName As String
-    Dim Cell As Range
+    Dim cell As Range
     Dim i As Integer
     Dim Outlook As Outlook.Application
     Dim MyItem As Outlook.MailItem

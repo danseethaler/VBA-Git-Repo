@@ -51,7 +51,7 @@ Sub InsertSQL(control As IRibbonControl) '
 Dim workRange As Range
 Dim InsertSQL As String
 Dim TableName As String
-Dim Cell As Range
+Dim cell As Range
 Dim Header As Range
 Dim Values As String
 Dim Continue As String
@@ -78,21 +78,21 @@ TableName = Replace(InputBox("What table is this data being input into?"), " ", 
 ActiveSheet.Name = TableName
 End If
 
-For Each Cell In Range("A1:" & Range("A1").End(xlToRight).Address)
-Fields = Fields & Replace(Cell, " ", "_") & ", "
-Next Cell
+For Each cell In Range("A1:" & Range("A1").End(xlToRight).Address)
+Fields = Fields & Replace(cell, " ", "_") & ", "
+Next cell
 Fields = Left(Fields, Len(Fields) - 2)
 
-For Each Cell In Range("A2:A" & Range("A2").End(xlDown).Row)
+For Each cell In Range("A2:A" & Range("A2").End(xlDown).Row)
 
 For Each Header In Range("A1:" & Range("A1").End(xlToRight).Address)
-If Not IsEmpty(Cell.Offset(0, Header.Column - 1)) Then
-    If IsDate(Range(Cell.Offset(0, Header.Column - 1).Address)) Then
-        Values = Values & "TO_DATE('" & Format(Cell.Offset(0, Header.Column - 1), "yyyy-mm-dd") & "','YYYY-MM-DD'), "
-    ElseIf WorksheetFunction.IsNumber(Cell.Offset(0, Header.Column - 1)) Then
-        Values = Values & Cell.Offset(0, Header.Column - 1) & ", "
+If Not IsEmpty(cell.Offset(0, Header.Column - 1)) Then
+    If IsDate(Range(cell.Offset(0, Header.Column - 1).Address)) Then
+        Values = Values & "TO_DATE('" & Format(cell.Offset(0, Header.Column - 1), "yyyy-mm-dd") & "','YYYY-MM-DD'), "
+    ElseIf WorksheetFunction.IsNumber(cell.Offset(0, Header.Column - 1)) Then
+        Values = Values & cell.Offset(0, Header.Column - 1) & ", "
     Else
-        Values = Values & "'" & Replace(Cell.Offset(0, Header.Column - 1), "'", "''") & "', "
+        Values = Values & "'" & Replace(cell.Offset(0, Header.Column - 1), "'", "''") & "', "
     End If
 Else
     Values = Values & "NULL" & ", "
@@ -112,7 +112,7 @@ End If
 
 Values = ""
 
-Next Cell
+Next cell
 
 'InsertSQL = InsertSQL & vbNewLine & vbNewLine & "SELECT * FROM " & TableName & ";"
 
@@ -127,7 +127,7 @@ Sub CreateDecoder(control As IRibbonControl)
 'SQL
 
 Dim workRange As Range
-Dim Cell As Range
+Dim cell As Range
 Dim Expression As String
 Dim FieldName As String
 Dim IncludeCode As String
@@ -144,42 +144,42 @@ FieldName = InputBox("Please enter the field name to be deconded.", "Field Name"
     
     Expression = "CASE " & FieldName & vbNewLine
     
-For Each Cell In Selection
+For Each cell In Selection
 
-Cell = Replace(Cell, "'", "")
-Cell = Replace(Cell, "--", "-")
+cell = Replace(cell, "'", "")
+cell = Replace(cell, "--", "-")
 
-If Left(Cell.Address, 2) = Left(Selection.Columns(1).Address, 2) Then
+If Left(cell.Address, 2) = Left(Selection.Columns(1).Address, 2) Then
 
-    If WorksheetFunction.IsText(Cell) Then
-        Expression = Expression & "  WHEN '" & Cell & "' "
+    If WorksheetFunction.IsText(cell) Then
+        Expression = Expression & "  WHEN '" & cell & "' "
         Else
-        Expression = Expression & "  WHEN " & Cell & " "
+        Expression = Expression & "  WHEN " & cell & " "
     End If
     
     Else
 
-    If WorksheetFunction.IsText(Cell) Then
+    If WorksheetFunction.IsText(cell) Then
     
             If IncludeCode = vbYes Then
-                Expression = Expression & " THEN '" & Cell.Offset(0, -1) & " - " & Cell & "'" & vbNewLine
+                Expression = Expression & " THEN '" & cell.Offset(0, -1) & " - " & cell & "'" & vbNewLine
             Else
-                Expression = Expression & " THEN '" & Cell & "'" & vbNewLine
+                Expression = Expression & " THEN '" & cell & "'" & vbNewLine
             End If
     
         Else
     
             If IncludeCode = vbYes Then
-                Expression = Expression & " THEN '" & Cell.Offset(0, -1) & " - " & Cell & "" & vbNewLine
+                Expression = Expression & " THEN '" & cell.Offset(0, -1) & " - " & cell & "" & vbNewLine
             Else
-                Expression = Expression & " THEN '" & Cell & "'" & vbNewLine
+                Expression = Expression & " THEN '" & cell & "'" & vbNewLine
             End If
         
     End If
     
 End If
 
-Next Cell
+Next cell
 
 Expression = Expression & "  ELSE " & FieldName & vbNewLine & "END"
 

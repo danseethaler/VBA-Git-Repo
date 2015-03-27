@@ -96,11 +96,11 @@ End If
 
 End Function
 
-Function CellType(Cell As Range) As String
+Function CellType(cell As Range) As String
 '   Returns the cell type of the upper left cell in a range
     Dim UpperLeft As Range
     Application.Volatile True
-    Set UpperLeft = Cell.Range("A1")
+    Set UpperLeft = cell.Range("A1")
     Select Case True
         Case UpperLeft.NumberFormat = "@"
             CellType = "Text"

@@ -26,7 +26,7 @@ If Left(ActiveSheet.PivotTables(1).TableRange1.Cells(1).Address, 4) <> "$A$3" Th
 Dim pt As PivotTable
 Dim pf As PivotField
 Dim ColumnCount As Integer
-Dim Cell As Range
+Dim cell As Range
 Dim counter As Integer
 Dim FillCells As Integer
 
@@ -49,31 +49,31 @@ ActiveSheet.PivotTables(1).TableRange1.Cells(1).Select
 
 Call ConvertPivotCall
 
-For Each Cell In Range(ActiveCell.Address, ActiveCell.End(xlDown))
+For Each cell In Range(ActiveCell.Address, ActiveCell.End(xlDown))
 
-If Cell.IndentLevel > 0 Then
+If cell.IndentLevel > 0 Then
 
-    Do While Cell.IndentLevel - counter > 0
-        Cell.Insert Shift:=xlToRight
+    Do While cell.IndentLevel - counter > 0
+        cell.Insert Shift:=xlToRight
     counter = counter + 1
     Loop
     counter = 0
     
 Else
 
-Range(Cell.Offset(0, 1), Cell.Offset(0, 10)).ClearContents
+Range(cell.Offset(0, 1), cell.Offset(0, 10)).ClearContents
 
 End If
 
-Next Cell
+Next cell
 
-For Each Cell In Intersect(Columns(ColumnCount), ActiveSheet.UsedRange)
-If IsEmpty(Cell.Offset(0, -1)) Then
+For Each cell In Intersect(Columns(ColumnCount), ActiveSheet.UsedRange)
+If IsEmpty(cell.Offset(0, -1)) Then
 
 FillCells = 1
 Do Until FillCells = ColumnCount
 
-Cells(Cell.Row, FillCells) = Cells(Cell.Row, FillCells).End(xlUp)
+Cells(cell.Row, FillCells) = Cells(cell.Row, FillCells).End(xlUp)
 FillCells = FillCells + 1
 
 Loop
@@ -83,7 +83,7 @@ Else
 'Rows(Cell.Row).Delete
 
 End If
-Next Cell
+Next cell
 
 
 End Sub
@@ -92,7 +92,7 @@ Sub test()
 Dim pf As PivotField
 Dim pt As PivotTable
 Dim ColumnCount As Integer
-Dim Cell As Range
+Dim cell As Range
 Dim CellValue As Range
 Dim IndentCount As Integer
 
@@ -111,28 +111,28 @@ Next pf
 
 Cells(3, 3 + ColumnCount) = "Count"
 
-For Each Cell In Range(Range("C3").Offset(1, ColumnCount), ActiveSheet.UsedRange.SpecialCells(xlCellTypeLastCell).Address)
+For Each cell In Range(Range("C3").Offset(1, ColumnCount), ActiveSheet.UsedRange.SpecialCells(xlCellTypeLastCell).Address)
 
 'If the cell in column 1 on the corresponding row is a data point
-If Cells(Cell.Row, 1).IndentLevel = ColumnCount - 1 Then
+If Cells(cell.Row, 1).IndentLevel = ColumnCount - 1 Then
 
 For IndentCount = 1 To ColumnCount
 
-Set CellValue = Cells(Cell.Row, 1)
+Set CellValue = Cells(cell.Row, 1)
 Do Until CellValue.IndentLevel = IndentCount - 1
 Set CellValue = CellValue.Offset(-1, 0)
 Loop
-Cell.Offset(0, -ColumnCount + IndentCount - 1) = CellValue
+cell.Offset(0, -ColumnCount + IndentCount - 1) = CellValue
 
 Next IndentCount
 
-Cell = Cell.Offset(0, -ColumnCount - 1)
+cell = cell.Offset(0, -ColumnCount - 1)
 
 Else
 
 End If
 
-Next Cell
+Next cell
 
 Range("C4", ActiveSheet.UsedRange.SpecialCells(xlCellTypeLastCell).Address).SpecialCells(xlCellTypeBlanks).Delete Shift:=xlUp
 

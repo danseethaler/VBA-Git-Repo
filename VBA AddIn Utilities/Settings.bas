@@ -76,9 +76,9 @@ End Sub
 
 
 Sub RemoveHyperlinks(control As IRibbonControl)
-Dim Cell As Range
-    For Each Cell In ActiveCell.CurrentRegion
-    Cell.Hyperlinks.Delete
+Dim cell As Range
+    For Each cell In ActiveCell.CurrentRegion
+    cell.Hyperlinks.Delete
     Next
     
 Call UsageLog("Remove Hyperlinks")

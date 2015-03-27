@@ -36,7 +36,7 @@ End Sub
 Sub ReverseNameCall(FormatRange As Range)
 
 Dim FirstName As String, LastName As String
-Dim Cell As Range
+Dim cell As Range
 Dim workRange As Range
 
 On Error Resume Next
@@ -80,52 +80,52 @@ On Error GoTo 0
 
 
 Dim NameValue As Boolean
-For Each Cell In workRange
+For Each cell In workRange
 
     
-    NameValue = Cell Like "[$,;,:]"
+    NameValue = cell Like "[$,;,:]"
     If NameValue <> True Then
         
-        If InStr(Cell, ",") Then
+        If InStr(cell, ",") Then
             
-            LastName = Left(Cell, InStr(Cell, ",") - 1)
-            FirstName = Right(Cell, Len(Cell) - InStr(Cell, ","))
+            LastName = Left(cell, InStr(cell, ",") - 1)
+            FirstName = Right(cell, Len(cell) - InStr(cell, ","))
         
             If Left(FirstName, 1) = " " Then
                 FirstName = Right(FirstName, Len(FirstName) - 1)
             End If
             
             
-            Cell = WorksheetFunction.Proper(FirstName & " " & LastName)
+            cell = WorksheetFunction.Proper(FirstName & " " & LastName)
         
         End If
         
         
-        If InStr(Cell, "  ") Then
+        If InStr(cell, "  ") Then
             
-            LastName = Left(Cell, InStr(Cell, "  ") - 1)
-            FirstName = Right(Cell, Len(Cell) - InStr(Cell, "  "))
+            LastName = Left(cell, InStr(cell, "  ") - 1)
+            FirstName = Right(cell, Len(cell) - InStr(cell, "  "))
         
             If Left(FirstName, 1) = " " Then
                 FirstName = Right(FirstName, Len(FirstName) - 1)
             End If
             
-            Cell = WorksheetFunction.Proper(FirstName & " " & LastName)
+            cell = WorksheetFunction.Proper(FirstName & " " & LastName)
         
         End If
         
-        Do Until Left(Cell, 1) <> " "
-            Cell = Right(Cell, Len(Cell) - 1)
+        Do Until Left(cell, 1) <> " "
+            cell = Right(cell, Len(cell) - 1)
         Loop
     
     End If
 
-Next Cell
+Next cell
 
 End Sub
 
 Sub ConvertEmpIDToTextCall(EmpIDRange As Range)
-Dim Cell As Range
+Dim cell As Range
 Dim workRange As Range
 
 On Error Resume Next
@@ -164,31 +164,31 @@ On Error GoTo 0
         Exit Sub
     End If
 
-For Each Cell In workRange
+For Each cell In workRange
 
-If IsNumeric(Cell) Then
+If IsNumeric(cell) Then
 
-    Cell.NumberFormat = "@"
+    cell.NumberFormat = "@"
     
-        If Len(Cell) = 1 Then
-                Cell.Value = "00000" & Cell.Value
-            ElseIf Len(Cell) = 2 Then
-                Cell.Value = "0000" & Cell.Value
-            ElseIf Len(Cell) = 3 Then
-                Cell.Value = "000" & Cell.Value
-            ElseIf Len(Cell) = 4 Then
-                Cell.Value = "00" & Cell.Value
-            ElseIf Len(Cell) = 5 Then
-                Cell.Value = "0" & Cell.Value
+        If Len(cell) = 1 Then
+                cell.Value = "00000" & cell.Value
+            ElseIf Len(cell) = 2 Then
+                cell.Value = "0000" & cell.Value
+            ElseIf Len(cell) = 3 Then
+                cell.Value = "000" & cell.Value
+            ElseIf Len(cell) = 4 Then
+                cell.Value = "00" & cell.Value
+            ElseIf Len(cell) = 5 Then
+                cell.Value = "0" & cell.Value
         End If
         
-        If Len(Cell) = 6 Then
-            Cell.Value = "'" & Cell.Value
+        If Len(cell) = 6 Then
+            cell.Value = "'" & cell.Value
         End If
 
 End If
         
-Next Cell
+Next cell
 
 End Sub
 

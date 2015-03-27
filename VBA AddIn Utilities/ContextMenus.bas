@@ -145,14 +145,14 @@ End Sub
 
 
 Sub Trimed(control As IRibbonControl)
-Dim Cell As Range
+Dim cell As Range
 
 If Selection.Cells.Count <= 1 Then
 Selection = Application.WorksheetFunction.Trim(Selection)
 Else
-For Each Cell In Selection.SpecialCells(xlCellTypeConstants)
-Cell = Application.WorksheetFunction.Trim(Cell)
-Next Cell
+For Each cell In Selection.SpecialCells(xlCellTypeConstants)
+cell = Application.WorksheetFunction.Trim(cell)
+Next cell
 End If
 
 End Sub
@@ -171,10 +171,10 @@ clipboard.PutInClipboard
 End Sub
 
 Sub ProperCase(control As IRibbonControl)
-Dim Cell As Range
+Dim cell As Range
 
-For Each Cell In Intersect(ActiveSheet.UsedRange, Selection)
-Cell = Application.WorksheetFunction.Proper(Cell)
-Next Cell
+For Each cell In Intersect(ActiveSheet.UsedRange, Selection)
+cell = Application.WorksheetFunction.Proper(cell)
+Next cell
 
 End Sub

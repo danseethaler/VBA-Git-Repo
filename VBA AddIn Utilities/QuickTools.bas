@@ -3,7 +3,7 @@ Option Explicit
 Dim workRange As Range
 
 Sub ConvertEmpIDToText(control As IRibbonControl)
-Dim Cell As Range
+Dim cell As Range
 Dim EmpIDCount As Integer
 
 Application.ScreenUpdating = False
@@ -48,36 +48,35 @@ On Error GoTo 0
         Exit Sub
     End If
 
-For Each Cell In workRange
+For Each cell In workRange
 
-    Do Until Right(Cell, 1) <> " "
-        Cell = Left(Cell, Len(Cell) - 1)
+    Do Until Right(cell, 1) <> " "
+        cell = Left(cell, Len(cell) - 1)
     Loop
 
-If IsNumeric(Cell) Then
+If IsNumeric(cell) Then
 
-    Cell.NumberFormat = "@"
+    cell.NumberFormat = "@"
     
-        If Len(Cell) = 1 Then
-            Cell.Value = "00000" & Cell.Value
-        ElseIf Len(Cell) = 2 Then
-            Cell.Value = "0000" & Cell.Value
-        ElseIf Len(Cell) = 3 Then
-            Cell.Value = "000" & Cell.Value
-        ElseIf Len(Cell) = 4 Then
-            Cell.Value = "00" & Cell.Value
-        ElseIf Len(Cell) = 5 Then
-            Cell.Value = "0" & Cell.Value
-        End If
-        
-        If Len(Cell) = 6 Then
-            Cell.Value = "'" & Cell.Value
-            'EmpIDCount = EmpIDCount + 1
-        End If
+    If Len(cell) = 1 Then
+        cell.Value = "00000" & cell.Value
+    ElseIf Len(cell) = 2 Then
+        cell.Value = "0000" & cell.Value
+    ElseIf Len(cell) = 3 Then
+        cell.Value = "000" & cell.Value
+    ElseIf Len(cell) = 4 Then
+        cell.Value = "00" & cell.Value
+    ElseIf Len(cell) = 5 Then
+        cell.Value = "0" & cell.Value
+    End If
+    
+    If Len(cell) = 6 Then
+        cell.Value = "'" & cell.Value
+    End If
 
 End If
         
-Next Cell
+Next cell
 
 Call UsageLog("EmpID to Text")
 
@@ -88,7 +87,7 @@ Application.ScreenUpdating = True
 End Sub
 
 Sub ConvertSSNToText(control As IRibbonControl)
-Dim Cell As Range
+Dim cell As Range
 Dim workRange As Range
 Dim SSNCount As Integer
 
@@ -132,27 +131,27 @@ workRange.Replace What:="-", Replacement:="", LookAt:=xlPart, _
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
 
-For Each Cell In workRange
+For Each cell In workRange
 
-If IsNumeric(Cell) Then
+If IsNumeric(cell) Then
 
-    Cell.NumberFormat = "@"
+    cell.NumberFormat = "@"
     
-        If Len(Cell) = 6 Then
-            Cell.Value = "000" & Cell.Value
-        ElseIf Len(Cell) = 7 Then
-            Cell.Value = "00" & Cell.Value
-        ElseIf Len(Cell) = 8 Then
-            Cell.Value = "0" & Cell.Value
+        If Len(cell) = 6 Then
+            cell.Value = "000" & cell.Value
+        ElseIf Len(cell) = 7 Then
+            cell.Value = "00" & cell.Value
+        ElseIf Len(cell) = 8 Then
+            cell.Value = "0" & cell.Value
         End If
 
-        If Len(Cell) = 9 Then
-            Cell.Value = "'" & Cell.Value
+        If Len(cell) = 9 Then
+            cell.Value = "'" & cell.Value
             SSNCount = SSNCount + 1
         End If
 End If
         
-Next Cell
+Next cell
 
 Call UsageLog("SSN to Text")
 
@@ -164,7 +163,7 @@ Sub PSTable(control As IRibbonControl)
 Dim TableName As String
 Dim ColumnCount As Integer
 Dim ActiveColumn As Integer
-Dim Cell As Range
+Dim cell As Range
 Dim DConnection As Integer
 
 Application.ScreenUpdating = False
@@ -229,16 +228,16 @@ If Len(Range("B1")) > 0 And Range("A1").Interior.PatternColor = 0 Then
         .PatternTintAndShade = 0
     End With
 
-For Each Cell In Range("A1:" & Cells(1, Range("A1").End(xlToRight).Column).Address)
+For Each cell In Range("A1:" & Cells(1, Range("A1").End(xlToRight).Column).Address)
         
-    Cell.HorizontalAlignment = Cell.Offset(1, 0).HorizontalAlignment
+    cell.HorizontalAlignment = cell.Offset(1, 0).HorizontalAlignment
     
-    If IsNumeric(Cell.Offset(1, 0)) Or IsDate(Cell.Offset(1, 0)) Then Cell.HorizontalAlignment = xlRight
-    If Cell.Offset(1, 0).NumberFormat = "@" Then Cell.HorizontalAlignment = xlLeft
+    If IsNumeric(cell.Offset(1, 0)) Or IsDate(cell.Offset(1, 0)) Then cell.HorizontalAlignment = xlRight
+    If cell.Offset(1, 0).NumberFormat = "@" Then cell.HorizontalAlignment = xlLeft
 
-Cell.VerticalAlignment = xlCenter
+cell.VerticalAlignment = xlCenter
 
-Next Cell
+Next cell
 
 End If
 
@@ -305,10 +304,10 @@ Application.ScreenUpdating = True
 
 End Sub
 
-Sub ListCriteria() 'control As IRibbonControl
+Sub ListCriteria(control As IRibbonControl)
 
 Dim workRange As Range
-Dim Cell As Range
+Dim cell As Range
 Dim List As String
 
 Dim clipboard As MSForms.DataObject
@@ -325,15 +324,17 @@ End If
 
 Set workRange = Intersect(Range(ActiveCell, ActiveCell.End(xlDown)).SpecialCells(xlCellTypeVisible), ActiveSheet.UsedRange)
 
-For Each Cell In workRange
+For Each cell In workRange
 
-    If InStr(1, List, Cell) = 0 And Not IsEmpty(Cell) Then
+    If InStr(1, List, cell) = 0 And Not IsEmpty(cell) Then
     
-        Cell = Replace(Cell, " ", "")
-    
-        If Len(List & Cell.Value) <= 255 Then
+        cell = Replace(cell, " ", "")
         
-            List = List & Cell.Value & "','"
+        If Len(cell) < 6 Then cell = numberToEmpID(cell)
+    
+        If Len(List & cell.Value) <= 255 Then
+        
+            List = List & cell.Value & "','"
         
         Else
         
@@ -342,13 +343,13 @@ For Each Cell In workRange
         End If
     
     End If
+    
+    cell.Select
 
-Next Cell
+Next cell
 
 'Truncate the ',' from the end of the list
 List = Left(List, Len(List) - 3)
-
-Range(Cell.Address).Select
 
 'If we've reached the end of the used range, send the active cell to the top of the worksheet
 If Intersect(ActiveCell.Offset(1, 0), ActiveSheet.UsedRange) Is Nothing Then
@@ -364,6 +365,33 @@ MsgBox ("This list has been copied to your clipboard." & vbNewLine & vbNewLine &
         "Paste this list in the 'List Members' of a PeopleSoft Query criteria for bulk processing.")
 
 End Sub
+
+Private Function numberToEmpID(cell As Range) As Range
+
+If IsNumeric(cell) Then
+
+    cell.NumberFormat = "@"
+    
+    If Len(cell) = 1 Then
+        cell.Value = "00000" & cell.Value
+    ElseIf Len(cell) = 2 Then
+        cell.Value = "0000" & cell.Value
+    ElseIf Len(cell) = 3 Then
+        cell.Value = "000" & cell.Value
+    ElseIf Len(cell) = 4 Then
+        cell.Value = "00" & cell.Value
+    ElseIf Len(cell) = 5 Then
+        cell.Value = "0" & cell.Value
+    End If
+    
+    cell.Value = "'" & cell.Value
+
+End If
+
+Set numberToEmpID = cell
+
+End Function
+
 
 Sub ReopenUnsavedWorkbook(control As IRibbonControl)
     Dim ConfirmSub
@@ -400,7 +428,7 @@ End Sub
 Private Sub ReverseName(control As IRibbonControl)
 
 Dim FirstName As String, LastName As String
-Dim Cell As Range
+Dim cell As Range
 Dim workRange As Range
 Dim NameCounter As Integer
 
@@ -445,53 +473,53 @@ On Error GoTo 0
 
 
 Dim NameValue As Boolean
-For Each Cell In workRange
+For Each cell In workRange
 
     
-    NameValue = Cell Like "[$,;,:]"
+    NameValue = cell Like "[$,;,:]"
     If NameValue <> True Then
         
-        If InStr(Cell, ",") Then
+        If InStr(cell, ",") Then
             
-            LastName = Left(Cell, InStr(Cell, ",") - 1)
-            FirstName = Right(Cell, Len(Cell) - InStr(Cell, ","))
+            LastName = Left(cell, InStr(cell, ",") - 1)
+            FirstName = Right(cell, Len(cell) - InStr(cell, ","))
         
             If Left(FirstName, 1) = " " Then
                 FirstName = Right(FirstName, Len(FirstName) - 1)
             End If
             
-            Cell = WorksheetFunction.Proper(FirstName & " " & LastName)
+            cell = WorksheetFunction.Proper(FirstName & " " & LastName)
 
-            Cell = Left(Cell, InStr(Cell, " ") - 1) & " " & Right(Cell, Len(Cell) - InStrRev(Cell, " "))
+            cell = Left(cell, InStr(cell, " ") - 1) & " " & Right(cell, Len(cell) - InStrRev(cell, " "))
             
             NameCounter = NameCounter + 1
         
         End If
         
-        If InStr(Cell, "  ") Then
+        If InStr(cell, "  ") Then
             
-            LastName = Left(Cell, InStr(Cell, "  ") - 1)
-            FirstName = Right(Cell, Len(Cell) - InStr(Cell, "  "))
+            LastName = Left(cell, InStr(cell, "  ") - 1)
+            FirstName = Right(cell, Len(cell) - InStr(cell, "  "))
         
             If Left(FirstName, 1) = " " Then
                 FirstName = Right(FirstName, Len(FirstName) - 1)
             End If
             
-            Cell = WorksheetFunction.Proper(FirstName & " " & LastName)
+            cell = WorksheetFunction.Proper(FirstName & " " & LastName)
             
-            Cell = Left(Cell, InStr(Cell, " ") - 1) & " " & Right(Cell, Len(Cell) - InStrRev(Cell, " "))
+            cell = Left(cell, InStr(cell, " ") - 1) & " " & Right(cell, Len(cell) - InStrRev(cell, " "))
             
             NameCounter = NameCounter + 1
         
         End If
         
-        Do Until Left(Cell, 1) <> " "
-            Cell = Right(Cell, Len(Cell) - 1)
+        Do Until Left(cell, 1) <> " "
+            cell = Right(cell, Len(cell) - 1)
         Loop
     
     End If
 
-Next Cell
+Next cell
 Call UsageLog("Reverse Name")
 
 'MsgBox NameCounter & " name(s) were reformatted to 'First Last' format."
@@ -720,26 +748,26 @@ End Sub
 
 
 Sub RemoveLeadingSpaces()
-Dim Cell As Range
+Dim cell As Range
 
-For Each Cell In Selection
-        Do Until Left(Cell, 1) <> " "
-            Cell = Right(Cell, Len(Cell) - 1)
+For Each cell In Selection
+        Do Until Left(cell, 1) <> " "
+            cell = Right(cell, Len(cell) - 1)
         Loop
-Next Cell
+Next cell
 
 End Sub
 
 Sub MakeProper()
-Dim Cell As Range
+Dim cell As Range
 
-For Each Cell In Selection
-    Cell.Value = WorksheetFunction.Proper(Cell)
+For Each cell In Selection
+    cell.Value = WorksheetFunction.Proper(cell)
 Next
 End Sub
 
 Sub RoundTwo(control As IRibbonControl)
-Dim Cell As Range
+Dim cell As Range
 
 If Selection.Count = 1 Then
     If IsNumeric(Selection) And Not IsEmpty(Selection) Then
@@ -749,10 +777,10 @@ Exit Sub
 End If
 End If
 
-For Each Cell In Intersect(Selection.SpecialCells(xlCellTypeConstants), Selection.CurrentRegion)
-    If IsNumeric(Cell.Value) Then
-    Cell.Value = WorksheetFunction.Round(Cell, 2)
-    Cell.NumberFormat = "0.00"
+For Each cell In Intersect(Selection.SpecialCells(xlCellTypeConstants), Selection.CurrentRegion)
+    If IsNumeric(cell.Value) Then
+    cell.Value = WorksheetFunction.Round(cell, 2)
+    cell.NumberFormat = "0.00"
     End If
 
 Next
@@ -784,12 +812,12 @@ On Error Resume Next
 End Sub
 
 Sub RemoveTrailingSpaces(control As IRibbonControl)
-Dim Cell As Range
+Dim cell As Range
 
-For Each Cell In Intersect(Selection.SpecialCells(xlCellTypeConstants), Selection.Parent.UsedRange)
+For Each cell In Intersect(Selection.SpecialCells(xlCellTypeConstants), Selection.Parent.UsedRange)
 
-    Do Until Right(Cell, 1) <> " "
-        Cell = Left(Cell, Len(Cell) - 1)
+    Do Until Right(cell, 1) <> " "
+        cell = Left(cell, Len(cell) - 1)
     Loop
 
 Next
@@ -797,7 +825,7 @@ Next
 End Sub
 
 Sub CountDuplicates(control As IRibbonControl)
-Dim Cell As Range
+Dim cell As Range
 Dim workRange As Range
 Dim UniqueCount As String
 Dim UniqueItems As Integer
@@ -815,21 +843,21 @@ Dim UniqueItems As Integer
     
     If workRange Is Nothing Then: MsgBox "Please select a valid range.": Exit Sub
 
-For Each Cell In workRange
-    If Cell.Row <> 1 Then
-    If InStr(1, UniqueCount, Cell) = 0 Then
-    UniqueCount = UniqueCount & Cell.Value & " " & Application.WorksheetFunction.CountIf(workRange, Cell) & vbNewLine
+For Each cell In workRange
+    If cell.Row <> 1 Then
+    If InStr(1, UniqueCount, cell) = 0 Then
+    UniqueCount = UniqueCount & cell.Value & " " & Application.WorksheetFunction.CountIf(workRange, cell) & vbNewLine
     UniqueItems = UniqueItems + 1
     End If
     End If
-Next Cell
+Next cell
 
 MsgBox ("Number of Unique Items: " & UniqueItems)
 
 End Sub
 
 Sub CountListDuplicates() 'control As IRibbonControl
-Dim Cell As Range
+Dim cell As Range
 Dim workRange As Range
 Dim UniqueCount As String
 Dim UniqueItems As Integer
@@ -847,15 +875,15 @@ Dim UniqueItems As Integer
     
     If workRange Is Nothing Then: MsgBox "Please select a valid range.": Exit Sub
 
-For Each Cell In workRange
-    If Cell.Row <> 1 Then
-    If InStr(1, UniqueCount, Cell) = 0 Then
-    UniqueCount = UniqueCount & Cell.Value & " " & Application.WorksheetFunction.CountIf(workRange, Cell) & vbNewLine
+For Each cell In workRange
+    If cell.Row <> 1 Then
+    If InStr(1, UniqueCount, cell) = 0 Then
+    UniqueCount = UniqueCount & cell.Value & " " & Application.WorksheetFunction.CountIf(workRange, cell) & vbNewLine
     UniqueItems = UniqueItems + 1
     End If
     If Len(UniqueCount) > 1000 Then: MsgBox ("This selection has way too many unique values."): Exit Sub
     End If
-Next Cell
+Next cell
 
 MsgBox (UniqueCount & vbNewLine & "Number of Unique Items: " & UniqueItems)
 
@@ -864,7 +892,7 @@ End Sub
 
 Sub ListCriteriaTest()
 
-Dim Cell As Range
+Dim cell As Range
 Dim Message As String
 Dim List As String
 Dim clipboard As MSForms.DataObject
@@ -877,7 +905,7 @@ On Error Resume Next
         
         Do Until Len(Message) - 3 > 245
             If ActiveCell.EntireRow.Hidden <> True Then
-            If InStr(1, ActiveCell, Cell) = 0 And Not IsEmpty(ActiveCell) Then
+            If InStr(1, ActiveCell, cell) = 0 And Not IsEmpty(ActiveCell) Then
                 Message = Message & ActiveCell.Value & "','"
             End If
             End If

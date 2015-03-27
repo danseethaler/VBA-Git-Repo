@@ -120,7 +120,7 @@ Sub AppendFiles() 'control As IRibbonControl
 Dim SourceNum As Integer
 Dim DestNum As Integer, FileCount As Long
 Dim Temp As String, DirectoryPath As String
-Dim FileName As String, Cell As Range
+Dim FileName As String, cell As Range
 Dim AggFile As String
 Dim AddName As String
 Dim FMACounter As Integer
@@ -222,32 +222,32 @@ End Sub
 
 Sub ConcatenateDelimitedText(control As IRibbonControl) '
 Dim ConcatRange As Range
-Dim Cell As Range
+Dim cell As Range
 
 Set ConcatRange = Intersect(Selection, Columns(ActiveCell.Column))
 
-For Each Cell In ConcatRange
+For Each cell In ConcatRange
 
 Select Case Selection.Columns.Count
-    Case 11: Cell.Value = Cell & " " & Cell.Offset(0, 1) & " " & Cell.Offset(0, 2) & " " & Cell.Offset(0, 3) & " " & Cell.Offset(0, 4) & " " & Cell.Offset(0, 5) & " " & Cell.Offset(0, 6) & " " & Cell.Offset(0, 7) & " " & Cell.Offset(0, 8) & " " & Cell.Offset(0, 9) & " " & Cell.Offset(0, 10)
-    Case 10: Cell.Value = Cell & " " & Cell.Offset(0, 1) & " " & Cell.Offset(0, 2) & " " & Cell.Offset(0, 3) & " " & Cell.Offset(0, 4) & " " & Cell.Offset(0, 5) & " " & Cell.Offset(0, 6) & " " & Cell.Offset(0, 7) & " " & Cell.Offset(0, 8) & " " & Cell.Offset(0, 9)
-    Case 9: Cell.Value = Cell & " " & Cell.Offset(0, 1) & " " & Cell.Offset(0, 2) & " " & Cell.Offset(0, 3) & " " & Cell.Offset(0, 4) & " " & Cell.Offset(0, 5) & " " & Cell.Offset(0, 6) & " " & Cell.Offset(0, 7) & " " & Cell.Offset(0, 8)
-    Case 8: Cell.Value = Cell & " " & Cell.Offset(0, 1) & " " & Cell.Offset(0, 2) & " " & Cell.Offset(0, 3) & " " & Cell.Offset(0, 4) & " " & Cell.Offset(0, 5) & " " & Cell.Offset(0, 6) & " " & Cell.Offset(0, 7)
-    Case 7: Cell.Value = Cell & " " & Cell.Offset(0, 1) & " " & Cell.Offset(0, 2) & " " & Cell.Offset(0, 3) & " " & Cell.Offset(0, 4) & " " & Cell.Offset(0, 5) & " " & Cell.Offset(0, 6)
-    Case 6: Cell.Value = Cell & " " & Cell.Offset(0, 1) & " " & Cell.Offset(0, 2) & " " & Cell.Offset(0, 3) & " " & Cell.Offset(0, 4) & " " & Cell.Offset(0, 5)
-    Case 5: Cell.Value = Cell & " " & Cell.Offset(0, 1) & " " & Cell.Offset(0, 2) & " " & Cell.Offset(0, 3) & " " & Cell.Offset(0, 4)
-    Case 4: Cell.Value = Cell & " " & Cell.Offset(0, 1) & " " & Cell.Offset(0, 2) & " " & Cell.Offset(0, 3)
-    Case 3: Cell.Value = Cell & " " & Cell.Offset(0, 1) & " " & Cell.Offset(0, 2)
-    Case 2: Cell.Value = Cell & " " & Cell.Offset(0, 1)
+    Case 11: cell.Value = cell & " " & cell.Offset(0, 1) & " " & cell.Offset(0, 2) & " " & cell.Offset(0, 3) & " " & cell.Offset(0, 4) & " " & cell.Offset(0, 5) & " " & cell.Offset(0, 6) & " " & cell.Offset(0, 7) & " " & cell.Offset(0, 8) & " " & cell.Offset(0, 9) & " " & cell.Offset(0, 10)
+    Case 10: cell.Value = cell & " " & cell.Offset(0, 1) & " " & cell.Offset(0, 2) & " " & cell.Offset(0, 3) & " " & cell.Offset(0, 4) & " " & cell.Offset(0, 5) & " " & cell.Offset(0, 6) & " " & cell.Offset(0, 7) & " " & cell.Offset(0, 8) & " " & cell.Offset(0, 9)
+    Case 9: cell.Value = cell & " " & cell.Offset(0, 1) & " " & cell.Offset(0, 2) & " " & cell.Offset(0, 3) & " " & cell.Offset(0, 4) & " " & cell.Offset(0, 5) & " " & cell.Offset(0, 6) & " " & cell.Offset(0, 7) & " " & cell.Offset(0, 8)
+    Case 8: cell.Value = cell & " " & cell.Offset(0, 1) & " " & cell.Offset(0, 2) & " " & cell.Offset(0, 3) & " " & cell.Offset(0, 4) & " " & cell.Offset(0, 5) & " " & cell.Offset(0, 6) & " " & cell.Offset(0, 7)
+    Case 7: cell.Value = cell & " " & cell.Offset(0, 1) & " " & cell.Offset(0, 2) & " " & cell.Offset(0, 3) & " " & cell.Offset(0, 4) & " " & cell.Offset(0, 5) & " " & cell.Offset(0, 6)
+    Case 6: cell.Value = cell & " " & cell.Offset(0, 1) & " " & cell.Offset(0, 2) & " " & cell.Offset(0, 3) & " " & cell.Offset(0, 4) & " " & cell.Offset(0, 5)
+    Case 5: cell.Value = cell & " " & cell.Offset(0, 1) & " " & cell.Offset(0, 2) & " " & cell.Offset(0, 3) & " " & cell.Offset(0, 4)
+    Case 4: cell.Value = cell & " " & cell.Offset(0, 1) & " " & cell.Offset(0, 2) & " " & cell.Offset(0, 3)
+    Case 3: cell.Value = cell & " " & cell.Offset(0, 1) & " " & cell.Offset(0, 2)
+    Case 2: cell.Value = cell & " " & cell.Offset(0, 1)
 
     Case Else: MsgBox ("Only 9 Columns can be concatenated with this function."): Exit Sub
 
 End Select
 
-Range(Cell.Offset(0, 1), Cell.Offset(0, Selection.Columns.Count - 1)).Clear
+Range(cell.Offset(0, 1), cell.Offset(0, Selection.Columns.Count - 1)).Clear
 
-    Do Until Right(Cell, 1) <> " "
-        Cell = Left(Cell, Len(Cell) - 1)
+    Do Until Right(cell, 1) <> " "
+        cell = Left(cell, Len(cell) - 1)
     Loop
 
 Next

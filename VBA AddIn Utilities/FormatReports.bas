@@ -105,7 +105,7 @@ End Sub
 Sub FormatPSALP(control As IRibbonControl)
 Dim LastRow As Integer
 Dim LastCell As String
-Dim Cell As Range
+Dim cell As Range
 Dim SendEmpIDs As Range
 Dim Continue As String
 
@@ -140,9 +140,9 @@ LastCell = ActiveSheet.UsedRange.SpecialCells(xlCellTypeLastCell).Offset(0, -1).
     
 LastRow = Range("A1").End(xlDown).Row
     
-For Each Cell In Range("F2:F" & LastRow)
-    Cell.Value = Cell.Value & Cell.Offset(0, 1)
-Next Cell
+For Each cell In Range("F2:F" & LastRow)
+    cell.Value = cell.Value & cell.Offset(0, 1)
+Next cell
 
 Range("G2:G" & LastRow).Delete Shift:=xlToLeft
 
@@ -151,11 +151,11 @@ Range("D2:D" & LastRow).Replace What:=" ", Replacement:="", LookAt:=xlPart, _
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
         
-For Each Cell In Range("D2:D" & LastRow)
-    If InStr(Cell, "-") Then
-        Cell = -Left(Cell, Len(Cell) - 1)
+For Each cell In Range("D2:D" & LastRow)
+    If InStr(cell, "-") Then
+        cell = -Left(cell, Len(cell) - 1)
     End If
-Next Cell
+Next cell
 
         
 Range("L2:L" & LastRow).Replace What:=" ", Replacement:="", LookAt:=xlPart, _
@@ -170,24 +170,24 @@ Columns(12).Insert
 Range("L1") = "LMP  Positive Input"
 Range("M1") = "LML  Positive Input"
 
-For Each Cell In Range("M2:M" & LastRow)
-    If InStr(Cell, "-") Then
-        Cell = -Left(Cell, Len(Cell) - 1)
+For Each cell In Range("M2:M" & LastRow)
+    If InStr(cell, "-") Then
+        cell = -Left(cell, Len(cell) - 1)
     End If
-Next Cell
+Next cell
 
-For Each Cell In Range("M2:M" & LastRow)
+For Each cell In Range("M2:M" & LastRow)
         
-    If Cell.Offset(0, -11) = Cell.Offset(1, -11) Then
+    If cell.Offset(0, -11) = cell.Offset(1, -11) Then
          
-        Cell.Offset(1, 1).Cut Destination:=Cell.Offset(0, 2)
-        Cell.Offset(1, 0).Cut Destination:=Cell.Offset(0, -1)
-        Cell.Offset(1, -9).Cut Destination:=Cell.Offset(0, -10)
-        Cell.Offset(1, 0).EntireRow.Delete
+        cell.Offset(1, 1).Cut Destination:=cell.Offset(0, 2)
+        cell.Offset(1, 0).Cut Destination:=cell.Offset(0, -1)
+        cell.Offset(1, -9).Cut Destination:=cell.Offset(0, -10)
+        cell.Offset(1, 0).EntireRow.Delete
             
     End If
 
-Next Cell
+Next cell
 
 LastRow = Range("A1").End(xlDown).Row
 
@@ -195,17 +195,17 @@ LastRow = Range("A1").End(xlDown).Row
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
 
-For Each Cell In Range("N2:N" & LastRow)
+For Each cell In Range("N2:N" & LastRow)
     
-    If Not IsEmpty(Cell) And Not IsEmpty(Cell.Offset(0, 1)) Then
-        Cell = Right(Cell, Len(Cell) - 4) & " - " & Right(Cell.Offset(0, 1), Len(Cell.Offset(0, 1)) - 4)
+    If Not IsEmpty(cell) And Not IsEmpty(cell.Offset(0, 1)) Then
+        cell = Right(cell, Len(cell) - 4) & " - " & Right(cell.Offset(0, 1), Len(cell.Offset(0, 1)) - 4)
     End If
     
-If IsEmpty(Cell) And Not IsEmpty(Cell.Offset(0, 1)) Then Cell = Right(Cell.Offset(0, 1), Len(Cell.Offset(0, 1)) - 4)
+If IsEmpty(cell) And Not IsEmpty(cell.Offset(0, 1)) Then cell = Right(cell.Offset(0, 1), Len(cell.Offset(0, 1)) - 4)
 
-If Not IsEmpty(Cell) And IsEmpty(Cell.Offset(0, 1)) Then Cell = Right(Cell, Len(Cell) - 4)
+If Not IsEmpty(cell) And IsEmpty(cell.Offset(0, 1)) Then cell = Right(cell, Len(cell) - 4)
     
-Next Cell
+Next cell
 
 Range("O2:O" & LastRow).ClearContents
 
@@ -242,17 +242,17 @@ Range("I1") = "Job Status"
 
 Range("O1") = "Action Needed"
 
-For Each Cell In Range("O2:O" & LastRow)
-    If InStr(Cell.Offset(0, -1), "Paysheet differs from AM Positive Input.") Then
-        Cell = "Check employee job data status and ensure balance adjustment has been made."
-    ElseIf InStr(Cell.Offset(0, -1), "Off Cycle Payout indicated.") Then
-        Cell = "Off-Cycle check already processed for ALP. Verify same hours and uncheck OK to Pay."
-    ElseIf InStr(Cell.Offset(0, -1), "Previous Payout") Then
-        Cell = "Ensure previous hours aren't paid out a second time."
-    ElseIf InStr(Cell.Offset(0, -1), "Multiple Vacation Payouts.") Then
-        Cell = "Ensure multiple payouts are not duplicate payments."
+For Each cell In Range("O2:O" & LastRow)
+    If InStr(cell.Offset(0, -1), "Paysheet differs from AM Positive Input.") Then
+        cell = "Check employee job data status and ensure balance adjustment has been made."
+    ElseIf InStr(cell.Offset(0, -1), "Off Cycle Payout indicated.") Then
+        cell = "Off-Cycle check already processed for ALP. Verify same hours and uncheck OK to Pay."
+    ElseIf InStr(cell.Offset(0, -1), "Previous Payout") Then
+        cell = "Ensure previous hours aren't paid out a second time."
+    ElseIf InStr(cell.Offset(0, -1), "Multiple Vacation Payouts.") Then
+        cell = "Ensure multiple payouts are not duplicate payments."
     End If
-Next Cell
+Next cell
 
     Rows("1:1").Font.Bold = True
     Range("A1").Select
@@ -328,7 +328,7 @@ Call UsageLog("Format Online Check Report")
 End Sub
 
 Sub OnlineCheckReportwithTRC(control As IRibbonControl)
-Dim List As Range, CompareRow As Integer, LastRow As Integer, ActiveRow As Range, Cell As Range
+Dim List As Range, CompareRow As Integer, LastRow As Integer, ActiveRow As Range, cell As Range
 Dim EmployeeCount As Integer, Continue As String
 
 If InStr(1, Range("B2"), "CPAY544A") = 0 Then
@@ -428,7 +428,7 @@ Application.ScreenUpdating = True
 End Sub
 
 Sub GoldsGymReport(control As IRibbonControl)
-Dim LastRow As Integer, Cell As Range, TextRows As String
+Dim LastRow As Integer, cell As Range, TextRows As String
 Dim Continue As String, PayDay As Date
 Dim i As Integer
 
@@ -442,13 +442,13 @@ Application.ScreenUpdating = False
 
 PayDay = Range("B4") + 7
 
-Set Cell = Range("A1")
+Set cell = Range("A1")
 
-Do Until InStr(1, Cell, "Employee ID") <> 0
-    Set Cell = Cell.Offset(1, 0)
+Do Until InStr(1, cell, "Employee ID") <> 0
+    Set cell = cell.Offset(1, 0)
 Loop
 
-Rows("1:" & Cell.Offset(-1, 0).Row).Delete
+Rows("1:" & cell.Offset(-1, 0).Row).Delete
 
 LastRow = ActiveSheet.UsedRange.SpecialCells(xlCellTypeLastCell).Row
 
@@ -492,8 +492,8 @@ Range("D3") = "Comments"
 
 LastRow = Range("A3").End(xlDown).Row
 
-For Each Cell In Range("D4:D" & LastRow)
-    If Cell.Offset(0, -1) = 0 Then Cell = "No payroll for this pay period"
+For Each cell In Range("D4:D" & LastRow)
+    If cell.Offset(0, -1) = 0 Then cell = "No payroll for this pay period"
 Next
 
    Columns("A:A").ColumnWidth = 12
