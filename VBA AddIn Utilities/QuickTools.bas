@@ -1,6 +1,6 @@
 Attribute VB_Name = "QuickTools"
 Option Explicit
-Dim WorkRange As Range
+Dim workRange As Range
 
 Sub ConvertEmpIDToText(control As IRibbonControl)
 Dim Cell As Range
@@ -13,7 +13,7 @@ On Error Resume Next
     If Selection.Cells.Count = 1 Then
         If Not IsEmpty(ActiveCell) And Not ActiveCell.HasFormula Then
             
-            Set WorkRange = Selection
+            Set workRange = Selection
         
         Else
 
@@ -25,8 +25,8 @@ On Error Resume Next
     
     ElseIf Selection.Cells.Count > 1 Then
 
-        Set WorkRange = Selection.SpecialCells(xlCellTypeConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
+        Set workRange = Selection.SpecialCells(xlCellTypeConstants)
+        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
     
     End If
     
@@ -42,13 +42,13 @@ On Error Resume Next
     
 On Error GoTo 0
     
-    If WorkRange Is Nothing Then
+    If workRange Is Nothing Then
         MsgBox "Please select a valid range."
         Application.ScreenUpdating = True
         Exit Sub
     End If
 
-For Each Cell In WorkRange
+For Each Cell In workRange
 
     Do Until Right(Cell, 1) <> " "
         Cell = Left(Cell, Len(Cell) - 1)
@@ -89,7 +89,7 @@ End Sub
 
 Sub ConvertSSNToText(control As IRibbonControl)
 Dim Cell As Range
-Dim WorkRange As Range
+Dim workRange As Range
 Dim SSNCount As Integer
 
 On Error Resume Next
@@ -97,7 +97,7 @@ On Error Resume Next
     If Selection.Cells.Count = 1 Then
         If Not IsEmpty(ActiveCell) And Not ActiveCell.HasFormula Then
             
-            Set WorkRange = Selection
+            Set workRange = Selection
         
         Else
 
@@ -108,8 +108,8 @@ On Error Resume Next
     
     ElseIf Selection.Cells.Count > 1 Then
 
-        Set WorkRange = Selection.SpecialCells(xlCellTypeConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
+        Set workRange = Selection.SpecialCells(xlCellTypeConstants)
+        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
     
     End If
     
@@ -123,16 +123,16 @@ On Error Resume Next
     
 On Error GoTo 0
     
-    If WorkRange Is Nothing Then
+    If workRange Is Nothing Then
         MsgBox "Please select a valid range."
         Exit Sub
     End If
 
-WorkRange.Replace What:="-", Replacement:="", LookAt:=xlPart, _
+workRange.Replace What:="-", Replacement:="", LookAt:=xlPart, _
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
 
-For Each Cell In WorkRange
+For Each Cell In workRange
 
 If IsNumeric(Cell) Then
 
@@ -305,12 +305,12 @@ Application.ScreenUpdating = True
 
 End Sub
 
-Sub ListCriteria(control As IRibbonControl)
+Sub ListCriteria() 'control As IRibbonControl
 
+Dim workRange As Range
 Dim Cell As Range
-Dim Message As String
-Dim Message1 As String
 Dim List As String
+
 Dim clipboard As MSForms.DataObject
 Set clipboard = New MSForms.DataObject
 
@@ -318,111 +318,50 @@ If TypeName(Selection) <> "Range" Then Exit Sub
 
 Application.ScreenUpdating = False
 
-If Selection.Cells.Count > 1 Then
-MsgBox "Psst... I'm going to select just the first cell of your selection and then continue." & vbNewLine & vbNewLine & _
-    "Then I will automatically select as many cells as will fit in a PeopleSoft list criteria." & vbNewLine & vbNewLine & _
-    "I'll also skip hidden cells and ignore duplicate values." & vbNewLine & vbNewLine & _
-    "Finally, I'll activate the next unique value in the column so you can simply run the macro again " & _
-    "to finish selecting the unique values. Pretty cool huh?"
-Range(Cells(Selection.Row, Selection.Column).Address(0, 0)).Select
-
+If Selection.Columns.Count > 1 Then
+    MsgBox "Please select a single column."
+    Exit Sub
 End If
 
-    If Selection.Cells.Count = 1 Then
-        If Not IsEmpty(ActiveCell) And Not ActiveCell.HasFormula Then
+Set workRange = Intersect(Range(ActiveCell, ActiveCell.End(xlDown)).SpecialCells(xlCellTypeVisible), ActiveSheet.UsedRange)
+
+For Each Cell In workRange
+
+    If InStr(1, List, Cell) = 0 And Not IsEmpty(Cell) Then
+    
+        Cell = Replace(Cell, " ", "")
+    
+        If Len(List & Cell.Value) <= 255 Then
         
-        Do Until Len(Message) - 3 > 245
-            If ActiveCell.EntireRow.Hidden <> True Then
-            If InStr(1, Message, ActiveCell) = 0 And Not IsEmpty(ActiveCell) Then
+            List = List & Cell.Value & "','"
+        
+        Else
+        
+            Exit For
             
-                Do Until Right(ActiveCell, 1) <> " "
-                ActiveCell = Left(ActiveCell, Len(ActiveCell) - 1)
-                Loop
-                
-                Message1 = Message & ActiveCell.Value & "','"
-                
-                If Len(Message1) > 255 Then GoTo MaxMessage
-                
-                Message = Message & ActiveCell.Value & "','"
-            End If
-            End If
-        ActiveCell.Offset(1, 0).Select
-        
-        If IsEmpty(ActiveCell) Then
-            Selection.Offset(-1, 0).End(xlUp).Select
-            Exit Do
-        End If
-        
-        Loop
-        
         End If
     
-    ElseIf Selection.Cells.Count > 1 Then
-
-        Set WorkRange = Selection.SpecialCells(xlCellTypeVisible)
-        Set WorkRange = WorkRange.SpecialCells(xlCellTypeConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
-    
-    If Err = 1004 Or Err = 94 Or Err = 91 Then
-        MsgBox "There are no constants in your selection", vbInformation
-        Exit Sub
-        
-    ElseIf Err = 6 Then
-    
-        Set WorkRange = Selection.SpecialCells(xlCellTypeConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
-    
-    
-    ElseIf Err <> 0 Then
-        MsgBox "Error " & Err & ": " & Error(Err.Number), vbCritical
-        Exit Sub
     End If
-
-For Each Cell In WorkRange
-
-If Cell.Rows(Cell.Row).Hidden = True Then GoTo SkipCell
-
-If Not IsEmpty(Cell) And InStr(1, Message, Cell) = 0 Then
-    Message = Message & Cell.Value & "','"
-End If
-
-SkipCell:
 
 Next Cell
 
+'Truncate the ',' from the end of the list
+List = Left(List, Len(List) - 3)
+
+Range(Cell.Address).Select
+
+'If we've reached the end of the used range, send the active cell to the top of the worksheet
+If Intersect(ActiveCell.Offset(1, 0), ActiveSheet.UsedRange) Is Nothing Then
+    ActiveCell.End(xlUp).Select
 End If
 
-MaxMessage:
+clipboard.SetText List
+clipboard.PutInClipboard
 
 Application.ScreenUpdating = True
 
-Selection.Select
-
-If Selection.Row <> 1 Then
-
-Do Until Selection <> Selection.Offset(-1, 0)
-Selection.Offset(1, 0).Select
-Loop
-
-End If
-
-If IsEmpty(Selection) Then Selection.Offset(-1, 0).End(xlUp).Select
-
-If Len(Left(Message, Len(Message) - 3)) > 255 Then
-MsgBox ("Each list member in PeopleSoft can contain a maximum of 28 EmplIDs." & vbNewLine & vbNewLine & _
-    "Please shrink your selection size and then add multiple selections to the PeopleSoft list members."), vbCritical
-Exit Sub
-End If
-
-Message = Left(Message, Len(Message) - 3)
-
-clipboard.SetText Message
-clipboard.PutInClipboard
-
 MsgBox ("This list has been copied to your clipboard." & vbNewLine & vbNewLine & _
-        "You can paste it into the PeopleSoft list members to add.")
-        
-Call UsageLog("List Criteria")
+        "Paste this list in the 'List Members' of a PeopleSoft Query criteria for bulk processing.")
 
 End Sub
 
@@ -462,7 +401,7 @@ Private Sub ReverseName(control As IRibbonControl)
 
 Dim FirstName As String, LastName As String
 Dim Cell As Range
-Dim WorkRange As Range
+Dim workRange As Range
 Dim NameCounter As Integer
 
 On Error Resume Next
@@ -470,7 +409,7 @@ On Error Resume Next
     If Selection.Cells.Count = 1 Then
         If Not IsEmpty(ActiveCell) And Not ActiveCell.HasFormula Then
             
-            Set WorkRange = Selection
+            Set workRange = Selection
         
         Else
 
@@ -481,8 +420,8 @@ On Error Resume Next
     
     ElseIf Selection.Cells.Count > 1 Then
 
-        Set WorkRange = Selection.SpecialCells(xlCellTypeConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
+        Set workRange = Selection.SpecialCells(xlCellTypeConstants)
+        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
     
     End If
     
@@ -492,8 +431,8 @@ On Error Resume Next
     
     ElseIf Err = 6 Then
     
-        Set WorkRange = Selection.SpecialCells(xlCellTypeConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
+        Set workRange = Selection.SpecialCells(xlCellTypeConstants)
+        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
     
     ElseIf Err <> 0 Then
         MsgBox "Error " & Err & ": " & Error(Err.Number), vbCritical
@@ -506,7 +445,7 @@ On Error GoTo 0
 
 
 Dim NameValue As Boolean
-For Each Cell In WorkRange
+For Each Cell In workRange
 
     
     NameValue = Cell Like "[$,;,:]"
@@ -570,7 +509,7 @@ Call UsageLog("Copy Worksheet")
 End Sub
 
 Sub FormulastoValues(control As IRibbonControl)
-Dim WorkRange As Range
+Dim workRange As Range
 Dim intArea As Integer
 Dim rngCell As Range
 'Dim continue As String
@@ -580,13 +519,13 @@ Dim rngCell As Range
 '
 '    If continue = vbNo Then Exit Sub
     
-    Set WorkRange = Selection
-    Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
+    Set workRange = Selection
+    Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
 
 On Error Resume Next
 
-    If Not WorkRange.Cells.Count = 1 Then
-        Set WorkRange = WorkRange.SpecialCells(xlCellTypeFormulas)
+    If Not workRange.Cells.Count = 1 Then
+        Set workRange = workRange.SpecialCells(xlCellTypeFormulas)
     End If
     
     If Err = 1004 Or Err = 94 Then
@@ -599,31 +538,31 @@ On Error Resume Next
     
 On Error GoTo 0
     
-    If WorkRange Is Nothing Then
+    If workRange Is Nothing Then
         MsgBox "Please select a valid range.", vbCritical
         Exit Sub
     End If
 
-    If WorkRange.Cells.Count = 1 And IsEmpty(Selection.Cells(1, 1)) Then
+    If workRange.Cells.Count = 1 And IsEmpty(Selection.Cells(1, 1)) Then
         MsgBox "Please select a range with values", vbInformation
         Exit Sub
     End If
 
 On Error Resume Next
 
-    If WorkRange.Areas.Count > 1 Then
+    If workRange.Areas.Count > 1 Then
     
-        For intArea = 1 To WorkRange.Areas.Count
-            With WorkRange.Areas(intArea)
+        For intArea = 1 To workRange.Areas.Count
+            With workRange.Areas(intArea)
                 'Debug.Print WorkRange.Areas(intArea).Address
                ' .NumberFormat = "General"
                 .Value = .Value
             End With
         Next
         
-    ElseIf WorkRange.Areas.Count = 1 Then
+    ElseIf workRange.Areas.Count = 1 Then
     
-            With WorkRange
+            With workRange
                 .NumberFormat = "General"
                 .Value = .Value
             End With
@@ -859,7 +798,7 @@ End Sub
 
 Sub CountDuplicates(control As IRibbonControl)
 Dim Cell As Range
-Dim WorkRange As Range
+Dim workRange As Range
 Dim UniqueCount As String
 Dim UniqueItems As Integer
 
@@ -869,17 +808,17 @@ Dim UniqueItems As Integer
     
     ElseIf Selection.Cells.Count > 1 Then
 
-        Set WorkRange = Selection.SpecialCells(xlConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
+        Set workRange = Selection.SpecialCells(xlConstants)
+        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
     
     End If
     
-    If WorkRange Is Nothing Then: MsgBox "Please select a valid range.": Exit Sub
+    If workRange Is Nothing Then: MsgBox "Please select a valid range.": Exit Sub
 
-For Each Cell In WorkRange
+For Each Cell In workRange
     If Cell.Row <> 1 Then
     If InStr(1, UniqueCount, Cell) = 0 Then
-    UniqueCount = UniqueCount & Cell.Value & " " & Application.WorksheetFunction.CountIf(WorkRange, Cell) & vbNewLine
+    UniqueCount = UniqueCount & Cell.Value & " " & Application.WorksheetFunction.CountIf(workRange, Cell) & vbNewLine
     UniqueItems = UniqueItems + 1
     End If
     End If
@@ -891,7 +830,7 @@ End Sub
 
 Sub CountListDuplicates() 'control As IRibbonControl
 Dim Cell As Range
-Dim WorkRange As Range
+Dim workRange As Range
 Dim UniqueCount As String
 Dim UniqueItems As Integer
 
@@ -901,17 +840,17 @@ Dim UniqueItems As Integer
     
     ElseIf Selection.Cells.Count > 1 Then
 
-        Set WorkRange = Selection.SpecialCells(xlConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
+        Set workRange = Selection.SpecialCells(xlConstants)
+        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
     
     End If
     
-    If WorkRange Is Nothing Then: MsgBox "Please select a valid range.": Exit Sub
+    If workRange Is Nothing Then: MsgBox "Please select a valid range.": Exit Sub
 
-For Each Cell In WorkRange
+For Each Cell In workRange
     If Cell.Row <> 1 Then
     If InStr(1, UniqueCount, Cell) = 0 Then
-    UniqueCount = UniqueCount & Cell.Value & " " & Application.WorksheetFunction.CountIf(WorkRange, Cell) & vbNewLine
+    UniqueCount = UniqueCount & Cell.Value & " " & Application.WorksheetFunction.CountIf(workRange, Cell) & vbNewLine
     UniqueItems = UniqueItems + 1
     End If
     If Len(UniqueCount) > 1000 Then: MsgBox ("This selection has way too many unique values."): Exit Sub

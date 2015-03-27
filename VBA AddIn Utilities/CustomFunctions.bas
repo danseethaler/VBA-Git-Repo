@@ -420,9 +420,20 @@ End Sub
 
 Function LastNameMatch(Name1 As String, Name2 As String) As Boolean
 
+'Removing any trailing spaces from the two names
+Do Until Right(Name1, 1) <> " "
+    Name1 = Left(Name1, Len(Name1) - 1)
+Loop
+
+Do Until Right(Name2, 1) <> " "
+    Name1 = Left(Name2, Len(Name2) - 1)
+Loop
+
+'Determine if the last name in each string are the same, regardless of case
 If UCase(Right(Name1, Len(Name1) - InStrRev(Name1, " "))) = UCase(Right(Name2, Len(Name2) - InStrRev(Name2, " "))) Then
-LastNameMatch = True
-Else: LastNameMatch = False
+    LastNameMatch = True
+    Else
+    LastNameMatch = False
 End If
 
 End Function

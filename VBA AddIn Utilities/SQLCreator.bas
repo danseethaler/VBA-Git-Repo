@@ -48,7 +48,7 @@ End Sub
 
 Sub InsertSQL(control As IRibbonControl) '
 
-Dim WorkRange As Range
+Dim workRange As Range
 Dim InsertSQL As String
 Dim TableName As String
 Dim Cell As Range
@@ -126,7 +126,7 @@ End Sub
 Sub CreateDecoder(control As IRibbonControl)
 'SQL
 
-Dim WorkRange As Range
+Dim workRange As Range
 Dim Cell As Range
 Dim Expression As String
 Dim FieldName As String

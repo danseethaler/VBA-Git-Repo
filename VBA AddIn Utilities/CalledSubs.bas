@@ -37,14 +37,14 @@ Sub ReverseNameCall(FormatRange As Range)
 
 Dim FirstName As String, LastName As String
 Dim Cell As Range
-Dim WorkRange As Range
+Dim workRange As Range
 
 On Error Resume Next
 
     If FormatRange.Cells.Count = 1 Then
         If Not IsEmpty(ActiveCell) And Not ActiveCell.HasFormula Then
             
-            Set WorkRange = FormatRange
+            Set workRange = FormatRange
         
         Else
 
@@ -55,8 +55,8 @@ On Error Resume Next
     
     ElseIf FormatRange.Cells.Count > 1 Then
 
-        Set WorkRange = FormatRange.SpecialCells(xlCellTypeConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
+        Set workRange = FormatRange.SpecialCells(xlCellTypeConstants)
+        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
     
     End If
     
@@ -66,8 +66,8 @@ On Error Resume Next
     
     ElseIf Err = 6 Then
     
-        Set WorkRange = FormatRange.SpecialCells(xlCellTypeConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
+        Set workRange = FormatRange.SpecialCells(xlCellTypeConstants)
+        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
     
     ElseIf Err <> 0 Then
         MsgBox "Error " & Err & ": " & Error(Err.Number), vbCritical
@@ -80,7 +80,7 @@ On Error GoTo 0
 
 
 Dim NameValue As Boolean
-For Each Cell In WorkRange
+For Each Cell In workRange
 
     
     NameValue = Cell Like "[$,;,:]"
@@ -126,14 +126,14 @@ End Sub
 
 Sub ConvertEmpIDToTextCall(EmpIDRange As Range)
 Dim Cell As Range
-Dim WorkRange As Range
+Dim workRange As Range
 
 On Error Resume Next
 
     If EmpIDRange.Cells.Count = 1 Then
         If Not IsEmpty(ActiveCell) And Not ActiveCell.HasFormula Then
             
-            Set WorkRange = EmpIDRange
+            Set workRange = EmpIDRange
         
         Else
 
@@ -144,8 +144,8 @@ On Error Resume Next
     
     ElseIf EmpIDRange.Cells.Count > 1 Then
 
-        Set WorkRange = EmpIDRange.SpecialCells(xlCellTypeConstants)
-        Set WorkRange = Intersect(WorkRange, WorkRange.Parent.UsedRange)
+        Set workRange = EmpIDRange.SpecialCells(xlCellTypeConstants)
+        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
     
     End If
     
@@ -159,12 +159,12 @@ On Error Resume Next
     
 On Error GoTo 0
     
-    If WorkRange Is Nothing Then
+    If workRange Is Nothing Then
         MsgBox "Please select a valid range."
         Exit Sub
     End If
 
-For Each Cell In WorkRange
+For Each Cell In workRange
 
 If IsNumeric(Cell) Then
 
