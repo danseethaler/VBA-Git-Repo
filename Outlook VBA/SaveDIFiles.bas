@@ -123,7 +123,7 @@ If DIWorkbook.Sheets(1).Range("A1").Value = "" Then
     DIWorkbook.Sheets(1).Range("J1").Value = "Wrong Dates?"
     DIWorkbook.Sheets(1).Range("K1").Value = "Invalid Filename?"
     
-    DIWorkbook.Sheets(1).Name = "DI Errors"
+    DIWorkbook.Sheets(1).Name = "Email Details"
     DIWorkbook.Sheets.Add After:=Excel.Sheets(1)
     DIWorkbook.Sheets(2).Name = "Errors"
     DIWorkbook.Sheets.Add After:=Excel.Sheets(2)
@@ -286,6 +286,19 @@ NextRow = DIWorkbook.Sheets(1).UsedRange.SpecialCells(xlLastCell).Row + 1
             Next i
     Next
     
+    
+    'Instatiate the AddIns in Excel (this does not happen automatically when Excel
+    'is instatiated programmatically
+    Dim CurrAddin As Excel.AddIn
+    For Each CurrAddin In Excel.AddIns
+    Debug.Print CurrAddin.Name
+        If CurrAddin.Installed Then
+            CurrAddin.Installed = False
+            CurrAddin.Installed = True
+        End If
+    Next CurrAddin
+    
+    'Make Excel Visible and turn screen updating back on
     Excel.Visible = True
     Excel.ScreenUpdating = True
     DIWorkbook.Save
@@ -306,6 +319,7 @@ NextRow = DIWorkbook.Sheets(1).UsedRange.SpecialCells(xlLastCell).Row + 1
      AttachmentCounter = 0
      
 End Sub
+
 
 Sub MoveDIEmails()
 

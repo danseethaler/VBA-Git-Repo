@@ -75,7 +75,7 @@
 		<button id="b3" label="Online Check Report" supertip="Format the Online Check Report to show only a single line for each check." onAction="OnlineCheckReport" />
 		<button id="b4" label="Online Check Report (TRC)" supertip="Format the Online Check Report with check number and name on each line. This will preserve the earnings codes and hours for each check." onAction="OnlineCheckReportwithTRC" />
 		<button id="b5" label="Gold's Gym Summary" supertip="Summarize the Gold's Gym Report from process PAY001 to prepare for the Gold's Gym representative." onAction="GoldsGymReport" />
-
+		<button id="CTL916" supertip="Format and save the CTL916 file." label="Format/Save CTL916" onAction="CTL916" imageMso="FileClose" />
 	</menu>
 
 	<menu id="Miscellaneous" label="Miscellaneous" imageMso="ObjectShadowColorMoreColorsDialog">
