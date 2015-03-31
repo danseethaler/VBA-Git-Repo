@@ -68,13 +68,14 @@ Sub SaveDITextFileAttachments()
     If Excel Is Nothing Then Set Excel = CreateObject("Excel.Application")
 
     If Dir("\\L12239\CXFUSR\Appl\HR800\") = "" Then
-    
         With Excel.Application.FileDialog(msoFileDialogFolderPicker)
+        
             .InitialFileName = CreateObject("WScript.Shell").SpecialFolders("Desktop")
             .Title = "Select the folder to save the attachments."
             .Show
             If .SelectedItems.Count <> 1 Then Exit Sub
             DirectoryPath = .SelectedItems(1) & "\"
+            
         End With
     Else
         DirectoryPath = "\\L12239\CXFUSR\Appl\HR800\PS\Temp\GSC\"
@@ -84,10 +85,14 @@ Sub SaveDITextFileAttachments()
     WBookName = "DI Email Details - PP" & RecentPP() & ".xlsx"
     
     If Dir("\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\") <> "" Then
-        DirectoryPathDetails = "\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor " & _
-            "Absence Management\" & WBookName
+    
+            DirectoryPathDetails = "\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor " & _
+                "Absence Management\Processed (Historic)\Time America Details\" & WBookName
+            
         Else
-        DirectoryPathDetails = CreateObject("WScript.Shell").SpecialFolders("Desktop") \ " & WBookName"
+        
+            DirectoryPathDetails = CreateObject("WScript.Shell").SpecialFolders("Desktop") \ " & WBookName"
+    
     End If
     
     
@@ -325,7 +330,7 @@ Sub MoveDIEmails()
 
     Dim Outlook As New Outlook.Application
     Dim Namespace As Outlook.Namespace
-    Dim DestFolder As Outlook.Folder
+    Dim destFolder As Outlook.Folder
     Dim cabinetFolder As Outlook.Folder
     Dim attachmentEmails As items
     Dim Item As MailItem
@@ -347,12 +352,12 @@ End If
 
 'Set the destination folder to the GSC-DIPayroll Inbox
 On Error Resume Next
- Set DestFolder = Namespace.Folders("GSC-DIPayroll@ldschurch.org").Folders("Inbox")
- Set DestFolder = Namespace.Folders("GSC-DIPayroll").Folders("Inbox")
+ Set destFolder = Namespace.Folders("GSC-DIPayroll@ldschurch.org").Folders("Inbox")
+ Set destFolder = Namespace.Folders("GSC-DIPayroll").Folders("Inbox")
 On Error GoTo 0
 
 'If the GSC-DIPayroll box doesn't exit then exit the sub
-If DestFolder = "" Then
+If destFolder = "" Then
     MsgBox "Please add the GSC-DIPayroll box to your Outlook before running this macro."
     Set Namespace = Nothing
 End If
@@ -374,7 +379,7 @@ Set attachmentEmails = attachmentEmails.Restrict(holdsAttachment)
 For a = attachmentEmails.Count To 1 Step -1
     For i = 1 To attachmentEmails(a).Attachments.Count
         If InStr(UCase(attachmentEmails(a).Attachments(i).DisplayName), ".TXT") > 0 Then
-            attachmentEmails(a).Move DestFolder
+            attachmentEmails(a).Move destFolder
             EmailCount = EmailCount + 1
             Exit For
         End If
@@ -390,7 +395,7 @@ Next a
         Shell "C:\WINDOWS\explorer.exe """ & DirectoryPath & "", vbNormalFocus
     End If
 
-    MsgBox (EmailCount & " email(s) have been moved to the " & DestFolder & " folder.")
+    MsgBox (EmailCount & " email(s) have been moved to the " & destFolder & " folder.")
     
 End Sub
 
