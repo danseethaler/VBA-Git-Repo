@@ -1,41 +1,35 @@
 Option Explicit
 
-Private Sub Application_ItemSend(ByVal item As Object, Cancel As Boolean)
-
-End Sub
-
 Private Sub Application_NewMail()
 'When a new email arrive mark unread deleted items as read
-Dim myNamespace As Outlook.Namespace
-Dim deletedEmails As items
+Dim namespace As Outlook.namespace
+Dim unreadEmails As items
 Dim item As Object
 Dim i As Integer
 
-    'Set the deletedEmails collection to the unread emails in the default trash folder
-    Set myNamespace = Application.GetNamespace("MAPI")
-    Set deletedEmails = myNamespace.GetDefaultFolder(olFolderDeletedItems).items.Restrict("[UnRead] = True")
+    'Set the unreadEmails collection to the unread emails in the default trash folder
+    Set namespace = Application.GetNamespace("MAPI")
+    Set unreadEmails = namespace.GetDefaultFolder(olFolderDeletedItems).items.Restrict("[UnRead] = True")
     
     'Iterate through the emails in reverse and change the UnRead property to False
-    For i = deletedEmails.Count To 1 Step -1
-        deletedEmails(i).UnRead = False
+    For i = unreadEmails.Count To 1 Step -1
+        unreadEmails(i).UnRead = False
+    Next
+
+    'Set the unreadEmails collection to the unread emails in the cases folder
+    Set unreadEmails = namespace.folders("danseethaler@ldschurch.org").folders("Cases").items.Restrict("[UnRead] = True")
+    
+    'Iterate through the emails in reverse and change the UnRead property to False
+    For i = unreadEmails.Count To 1 Step -1
+        unreadEmails(i).UnRead = False
     Next
     
-End Sub
-
-Private Sub Application_Startup()
-'When the application starts up mark unread deleted items as read
-Dim myNamespace As Outlook.Namespace
-Dim deletedEmails As items
-Dim item As Object
-Dim i As Integer
-
-    'Set the deletedEmails collection to the unread emails in the default trash folder
-    Set myNamespace = Application.GetNamespace("MAPI")
-    Set deletedEmails = myNamespace.GetDefaultFolder(olFolderDeletedItems).items.Restrict("[UnRead] = True")
+    'Set the unreadEmails collection to the unread emails in the archive folder
+    Set unreadEmails = namespace.folders("danseethaler@ldschurch.org").folders("Archive").items.Restrict("[UnRead] = True")
     
     'Iterate through the emails in reverse and change the UnRead property to False
-    For i = deletedEmails.Count To 1 Step -1
-        deletedEmails(i).UnRead = False
+    For i = unreadEmails.Count To 1 Step -1
+        unreadEmails(i).UnRead = False
     Next
 
 End Sub
