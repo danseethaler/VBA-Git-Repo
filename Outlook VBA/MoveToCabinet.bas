@@ -1,49 +1,34 @@
 Attribute VB_Name = "MoveToCabinet"
 Option Explicit
 
-Sub MoveToCabinet()
+Sub MoveEmailsToCabinet()
 
 'Instance variables
 Dim todayCriteria As String
 Dim i As Integer
+Dim n As Integer
 Dim moveEmail As Boolean
-Dim emailsMoved As Long
+Dim emailsMoved As Integer
 
 'Reference variables
 Dim attachment As attachment
 Dim toCabinetEmails As items
-Dim emailAccount As Account
-Dim accountInbox As Outlook.Folder
 Dim Outlook As New Outlook.Application
-Dim Namespace As Outlook.Namespace
-Dim destFolder As Outlook.Folder
+Dim namespace As Outlook.namespace
 
-Set Namespace = Application.GetNamespace("MAPI")
+Set namespace = Application.GetNamespace("MAPI")
 
 'Define the collection filter to restrict processing to emails received before today.
 todayCriteria = "[ReceivedTime] < '" & Format(Date, "ddddd h:nn AMPM") & "'"
 
 'Loop through each mailbox in Outlook
-For Each emailAccount In Namespace.Accounts
-    
-    'Set the accountInbox reference variable. This can be done in one of two ways
-    'depending on how the user setup the account
-    On Error Resume Next
-     Set accountInbox = Namespace.Folders(emailAccount.DisplayName).Folders("Inbox")
-     Set accountInbox = Namespace.Folders(emailAccount.UserName).Folders("Inbox").items.Restrict(todayCriteria)
-    On Error GoTo 0
-
-    'Set the destFolder reference variable. This can be done in one of two ways
-    'depending on how the user setup the account
-    On Error Resume Next
-     Set destFolder = Namespace.Folders(emailAccount.DisplayName).Folders("Cabinet")
-     Set destFolder = Namespace.Folders(emailAccount.UserName).Folders("Cabinet").items.Restrict(todayCriteria)
-    On Error GoTo 0
+    For n = namespace.folders.Count To 1 Step -1
     
     'Determine if the folder is the user's default inbox folder. If so, skip it.
-    If accountInbox.FolderPath <> Namespace.GetDefaultFolder(olFolderInbox).FolderPath Then
+    If namespace.folders(n).folders("Inbox").FolderPath <> namespace.GetDefaultFolder(olFolderInbox).FolderPath Then
         
-        Set toCabinetEmails = accountInbox.items.Restrict(todayCriteria)
+        'Create the collection of emails with only the old emails
+        Set toCabinetEmails = namespace.folders(n).folders("Inbox").items.Restrict(todayCriteria)
         toCabinetEmails.Sort "[ReceivedTime]", True
             
         For i = toCabinetEmails.Count To 1 Step -1
@@ -71,7 +56,7 @@ For Each emailAccount In Namespace.Accounts
             End If
         
         If moveEmail Then
-            toCabinetEmails(i).Move destFolder
+            toCabinetEmails(i).Move namespace.folders(n).folders("Cabinet")
             emailsMoved = emailsMoved + 1
         End If
         
@@ -79,12 +64,17 @@ For Each emailAccount In Namespace.Accounts
         moveEmail = True
         
         Next
-        
+    
+    Else 'If this is the default mailbox
+    
+    'for each
+    
+    
     End If
     
     
 Next
 
-MsgBox "All set." & vbNewLine & emailsMoved & " old emails in your accounts have been moved to their respective cabinets."
+MsgBox "All set." & vbNewLine & vbNewLine & emailsMoved & " old emails in your accounts have been moved to their respective cabinets."
 
 End Sub
