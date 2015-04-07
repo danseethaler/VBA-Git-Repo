@@ -288,15 +288,9 @@ Sub TimeAmericaErrorReport(control As IRibbonControl)
     Dim cell As Range
     Dim Outlook As Outlook.Application
     Dim MyItem As Outlook.MailItem
-    Dim ItemsSent As Integer
-    Dim EmailAction As String
     Dim EmailTemplate As String
-    Dim Continue As String
-    Dim Header As Range
-    Dim Preview As String
-    Dim AttachWorkbook As String
     Dim Stores As String
-    Dim MissingStores As String
+    Dim i As Integer
     
     'Make sure Outlook is open.
     On Error Resume Next
@@ -309,7 +303,25 @@ Sub TimeAmericaErrorReport(control As IRibbonControl)
     End If
     
     'Set the Email Template string variable equal to the directory of the Outlook email template
-    EmailTemplate = "\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\TA100 Uploads Template.oft"
+    EmailTemplate = "\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\Email Templates\TA100 Uploads Template.oft"
+    
+    'Remove any formulas in column A.
+    Range("A:A").Value = Range("A:A").Value
+
+    'Iterate through the error stores and generate a list of store names with errors on their file upload.
+    If Not IsEmpty(Range("A2")) Then
+        For i = Range("A1").End(xlDown).Row To 2 Step -1
+            'EmpID 353605 appears on this error report even though the job data is accruate.
+            If Range("A" & i).Offset(0, 1) = "353605" Then
+                Range("A" & i).EntireRow.Delete
+            End If
+            
+            If Not IsEmpty(Range("A" & i)) And InStr(1, Stores, Range("A" & i)) = 0 Then
+                Stores = Stores & Range("A" & i).Value & "<br>"
+            End If
+
+        Next i
+    End If
     
     'Range("A2") should have the storename associated with that error in it.
     'If not the macro will exit.
@@ -318,8 +330,11 @@ Sub TimeAmericaErrorReport(control As IRibbonControl)
         Exit Sub
     End If
     
-    'Remove any formulas in column A.
-    Range("A:A").Value = Range("A:A").Value
+    'Remove any astrisks from the worksheet (they come in from the error page).
+    Cells.Replace What:="~*", Replacement:="", LookAt:=xlPart, SearchOrder _
+    :=xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+    
+    Range("A:A").HorizontalAlignment = xlLeft
     
     'Save the workbook.
     ActiveWorkbook.Save
@@ -327,13 +342,6 @@ Sub TimeAmericaErrorReport(control As IRibbonControl)
     'Copy the worksheet with the errors
     Application.ActiveSheet.Copy
     ActiveWorkbook.SaveAs (CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\PP" & RecentPP() & " Load Errors")
-
-    'Iterate through the error stores and generate a list of store names with errors on their file upload.
-    For Each cell In Range("A2:A" & Range("A1").End(xlDown).Row)
-        If Not IsEmpty(cell) And InStr(1, Stores, cell) = 0 Then
-            Stores = Stores & cell.Value & "<br>"
-        End If
-    Next cell
     
     'This line creates the Outlook mail object and assigns it to the designated template.
     Set MyItem = Outlook.CreateItemFromTemplate(EmailTemplate)
@@ -359,7 +367,7 @@ MsgBox ("Please run the employee time by TRC report and make corrections to erro
 
 End Sub
 
-Sub MissingDIFiles(control As IRibbonControl)
+Sub EmailMissingDIStores(control As IRibbonControl)
 'This macro generates a dictionary object that is used to validate all DI stores
 'have submitted their Time America file and it is ready to process.
 'The output of this macro is an email to the stores who have not yet sent us their
@@ -369,6 +377,7 @@ Sub MissingDIFiles(control As IRibbonControl)
     Dim ToList As String
     Dim DirectoryPath As String
     Dim FileName As String
+    Dim missingStoresList As String
     Dim cell As Range
     Dim i As Integer
     Dim Outlook As Outlook.Application
@@ -445,12 +454,16 @@ End With
     'Iterate through the remaining dictionary keys and add the associated email addresses to the ToList string variable.
     For Each strKey In Stores.Keys()
         ToList = ToList & Stores(strKey) & ";"
+        missingStoresList = missingStoresList & strKey & vbNewLine
     Next
     
     'If all dictionary keys have been removed then we can safely say all files are ready to load.
     If Stores.Count = 0 Then
-        MsgBox "All DI files have been received."
-        Exit Sub
+            MsgBox "All DI files have been received."
+            Exit Sub
+        Else
+            clipboard.SetText missingStoresList
+            clipboard.PutInClipboard
     End If
 
     
@@ -465,7 +478,7 @@ End With
     End If
     
     'Create the email template from the specified directory path
-    Set MyItem = Outlook.CreateItemFromTemplate("\\chqpvun0066\finusr\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\DI TA100 Missing.oft")
+    Set MyItem = Outlook.CreateItemFromTemplate("\\chqpvun0066\finusr\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\Email Templates\DI TA100 Missing.oft")
     
     'Update the email with information from the macro and display the email.
     With MyItem

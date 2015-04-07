@@ -111,7 +111,7 @@ Set outApp = Nothing
 
 End Sub
 
-Sub AppendFiles() 'control As IRibbonControl
+Sub AppendFiles(control As IRibbonControl)
 'This macro will aggregate all the files with extension .txt in the selected folder
 'into a new file. This is used to aggregate the external time files from Time America
 'into a single file that can be uploaded a single time rather than uploading dozens
@@ -381,8 +381,11 @@ End With
 
 Application.ScreenUpdating = False
 
-'Add a new sheet to the current workbook.
-Sheets.Add
+'Create new sheet if current sheet is not empty
+If ActiveSheet.UsedRange.Address <> "$A$1" Or Not IsEmpty(Range("A1")) Then
+    Sheets.Add
+    ActiveSheet.Name = "Time America Files"
+End If
 
 'Set headers
     Range("A1").FormulaR1C1 = "File Name"
@@ -446,6 +449,9 @@ FileName = Dir(DirectoryPath, vbReadOnly) ' + vbHidden)
                 .TextFileTrailingMinusNumbers = True
                 .Refresh BackgroundQuery:=False
             End With
+            
+        'Delete the data connection that pulled in the file data
+        ActiveWorkbook.Connections(Left(FileName, Len(FileName) - 4)).Delete
         
         'Set the values of the cells in column A equal to the source filename.
         Range(ActiveCell.Offset(0, -1).Address, ActiveCell.End(xlDown).Offset(0, -1)) = Left(FileName, Len(FileName) - 4)
@@ -458,17 +464,6 @@ FileName = Dir(DirectoryPath, vbReadOnly) ' + vbHidden)
 FileName = Dir
 
 Loop
-
-'Copy all the data and add it to a new sheet to remove the data connections.
-    Range("A1").CurrentRegion.Copy
-    Sheets.Add
-    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-        :=False, Transpose:=False
-
-'Delete the original worksheet.
-    Application.DisplayAlerts = False
-    Sheets(ActiveSheet.Index + 1).Delete
-    Application.DisplayAlerts = True
     
 'Do some formatting and move the worksheet to it's own workbook.
     Columns("D:D").NumberFormat = "m/d/yyyy"
@@ -476,17 +471,27 @@ Loop
     Columns.AutoFit
     Range("A1").Select
     ActiveSheet.Move
+    
+Cells.EntireColumn.AutoFit
+Rows(1).Font.Bold = True
+
+'TODO: Add a pivot table to see the total hours for each file.
 
 Application.ScreenUpdating = True
 
 End Sub
 
-Sub ImportDLFiles()
+Sub ImportTimeAmericaFiles()
+'This macro will import all the Time America files in a given directory into the
+'current Excel workbook. The files will be deliminated by commas.
+'This is a useful tool for validating files loads and reviewing time in the external time files.
+
 Dim DirectoryPath As String
 Dim FileName As String
 
+'Allow the user to select the directory with the files
 With Application.FileDialog(msoFileDialogFolderPicker)
-        .InitialFileName = CreateObject("WScript.Shell").SpecialFolders("Desktop")
+        .InitialFileName = "\\L12239\CXFUSR\Appl\HR800\PS\Temp\GSC\"
         .Title = "Select the folder with external time files."
         .Show
         
@@ -497,56 +502,81 @@ With Application.FileDialog(msoFileDialogFolderPicker)
     
 End With
 
+Application.ScreenUpdating = False
+
+'Create new sheet if current sheet is not empty
+If ActiveSheet.UsedRange.Address <> "$A$1" Or Not IsEmpty(Range("A1")) Then
+    Sheets.Add
+    ActiveSheet.Name = "Time America Files"
+End If
+
+'Set headers
+    Range("A1").FormulaR1C1 = "EmpID"
+    Range("B1").FormulaR1C1 = "TRC"
+    Range("C1").FormulaR1C1 = "Hours"
+    Range("D1").FormulaR1C1 = "Reported Date"
+    Range("E1").FormulaR1C1 = "File Name"
+
+Range("A2").Select
+
+'Iterate through the files
 FileName = Dir(DirectoryPath, vbReadOnly) ' + vbHidden)
 
     Do While FileName <> ""
 
-If UCase(Right(FileName, 4)) = ".TXT" Or UCase(Right(FileName, 4)) = ".DAT" Then
-
-    With ActiveSheet.QueryTables.Add(Connection:= _
-        "TEXT;" & DirectoryPath & FileName _
-        , Destination:=Range(ActiveCell.Address))
-        .Name = "TIMEKEEPER A-D"
-        .FieldNames = True
-        .RowNumbers = False
-        .FillAdjacentFormulas = False
-        .PreserveFormatting = True
-        .RefreshOnFileOpen = False
-        .RefreshStyle = xlInsertDeleteCells
-        .SavePassword = False
-        .SaveData = True
-        .AdjustColumnWidth = True
-        .RefreshPeriod = 0
-        .TextFilePromptOnRefresh = False
-        .TextFilePlatform = 437
-        .TextFileStartRow = 1
-        .TextFileParseType = xlDelimited
-        .TextFileTextQualifier = xlTextQualifierDoubleQuote
-        .TextFileConsecutiveDelimiter = True
-        .TextFileTabDelimiter = True
-        .TextFileSemicolonDelimiter = False
-        .TextFileCommaDelimiter = False
-        .TextFileSpaceDelimiter = True
-        .TextFileColumnDataTypes = Array(1, 1, 1, 1)
-        .TextFileTrailingMinusNumbers = True
-        .Refresh BackgroundQuery:=False
-    End With
-
-Range("A" & ActiveSheet.UsedRange.SpecialCells(xlLastCell).Row + 1).Select
-
-End If
+        If UCase(Right(FileName, 4)) = ".TXT" Then
+        
+            'Import the files using delimination specific to the file format.
+            With ActiveSheet.QueryTables.Add(Connection:= _
+                "TEXT;" & DirectoryPath & FileName _
+                , Destination:=Range(ActiveCell.Address))
+                .Name = Left(FileName, Len(FileName) - 4)
+                .FieldNames = True
+                .RowNumbers = False
+                .FillAdjacentFormulas = False
+                .PreserveFormatting = True
+                .RefreshOnFileOpen = False
+                .RefreshStyle = xlInsertDeleteCells
+                .SavePassword = False
+                .SaveData = True
+                .AdjustColumnWidth = True
+                .RefreshPeriod = 0
+                .TextFilePromptOnRefresh = False
+                .TextFilePlatform = 437
+                .TextFileStartRow = 1
+                .TextFileParseType = xlDelimited
+                .TextFileTextQualifier = xlTextQualifierDoubleQuote
+                .TextFileConsecutiveDelimiter = False
+                .TextFileTabDelimiter = False
+                .TextFileSemicolonDelimiter = False
+                .TextFileCommaDelimiter = True
+                .TextFileSpaceDelimiter = False
+                .TextFileColumnDataTypes = Array(9, 1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1, 1, 5, 9, 9, 9, 9, 9, _
+                9, 9, 9, 9)
+                .TextFileTrailingMinusNumbers = True
+                .Refresh BackgroundQuery:=False
+            End With
+        
+        'Delete the data connection that pulled in the file data
+        ActiveWorkbook.Connections(Left(FileName, Len(FileName) - 4)).Delete
+        
+        'Set the values of the cells in column A equal to the source filename.
+        Range(ActiveCell.Offset(0, 4).Address, ActiveCell.End(xlDown).Offset(0, 4)) = Left(FileName, Len(FileName) - 4)
+        
+        'Change the active cell to be the next available cell.
+        Range("A" & ActiveSheet.UsedRange.SpecialCells(xlLastCell).Row + 1).Select
+        
+        End If
 
 FileName = Dir
 
 Loop
 
-Columns.AutoFit
-
-    Range("A1").Select
+Application.ScreenUpdating = True
 
 End Sub
 
-Sub ListReferencePaths()
+Sub ListGUIDsForReferenceLibraries()
      'Macro purpose:  To determine full path and Globally Unique Identifier (GUID)
      'to each referenced library.  Select the reference in the Tools\References
      'window, then run this code to get the information on the reference's library

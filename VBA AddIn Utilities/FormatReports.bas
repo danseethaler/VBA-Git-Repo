@@ -115,8 +115,7 @@ If InStr(Range("B2"), "CPAY002I") = 0 Then
     If Continue = vbNo Then Exit Sub
 End If
 
-ActiveSheet.Name = "ALP PP" & InputBox("Please enter the two digit pay period.", "Pay Period")
-
+ActiveSheet.Name = "ALP PP" & RecentPP()
 
 Application.ScreenUpdating = False
 
@@ -147,7 +146,7 @@ Next cell
 Range("G2:G" & LastRow).Delete Shift:=xlToLeft
 
 'Remove Spaces
-Range("D2:D" & LastRow).Replace What:=" ", Replacement:="", LookAt:=xlPart, _
+Range("D2:D" & LastRow).Replace What:=" ", Replacement:=", LookAt:=xlPart, _
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
         
@@ -158,7 +157,7 @@ For Each cell In Range("D2:D" & LastRow)
 Next cell
 
         
-Range("L2:L" & LastRow).Replace What:=" ", Replacement:="", LookAt:=xlPart, _
+Range("L2:L" & LastRow).Replace What:=" ", Replacement:=", LookAt:=xlPart, _
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
 
@@ -191,7 +190,7 @@ Next cell
 
 LastRow = Range("A1").End(xlDown).Row
 
-'Range("M2:N" & LastRow).Replace What:="***", Replacement:="", LookAt:=xlPart, _
+'Range("M2:N" & LastRow).Replace What:="***", Replacement:=", LookAt:=xlPart, _
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
 
@@ -227,31 +226,62 @@ With Range("N2:N" & LastRow)
         ReplaceFormat:=False
 End With
 
-'Columns I and J do not contain valid data in this report as of 4/21/14
-Range("I1") = "Job Status"
-'For Each Cell In Range("I2:I" & LastRow)
-'    Cell = Switch("T", "Terminated", "D", "Death", "P", "Position Change")
-'Next Cell
-'
-'Range("J1") = "Check Status"
-'For Each Cell In Range("J2:J" & LastRow)
-'    Cell = Switch("F", "Confirmed", "C", "Calculated", "R", "Reversed")
-'Next Cell
-'
-'Range("K1") = "Off-Cycle?"
+'Generate description of Payroll Status
+Range("I1") = "Payroll Status"
+
+    Range("I:I").Replace What:="A", Replacement:="Active", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="D", Replacement:="Deceased", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="L", Replacement:="Leave of Absence", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="P", Replacement:="Leave With Pay", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="Q", Replacement:="Retired With Pay", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="R", Replacement:="Retired", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="S", Replacement:="Suspended", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="T", Replacement:="Terminated", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="U", Replacement:="Terminated With Pay", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="V", Replacement:="Terminated Pension Pay Out", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="W", Replacement:="Short Work Break", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    Range("I:I").Replace What:="X", Replacement:="Retired-Pension Administration", LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+
 
 Range("O1") = "Action Needed"
 
+'Provide some detail to the messages in the report.
 For Each cell In Range("O2:O" & LastRow)
+
     If InStr(cell.Offset(0, -1), "Paysheet differs from AM Positive Input.") Then
         cell = "Check employee job data status and ensure balance adjustment has been made."
     ElseIf InStr(cell.Offset(0, -1), "Off Cycle Payout indicated.") Then
-        cell = "Off-Cycle check already processed for ALP. Verify same hours and uncheck OK to Pay."
+        cell = "Off-Cycle check already processed for ALP. If an on-cycle payment for this employee is also listed on this report, you may need to uncheck to OK to Pay."
     ElseIf InStr(cell.Offset(0, -1), "Previous Payout") Then
         cell = "Ensure previous hours aren't paid out a second time."
     ElseIf InStr(cell.Offset(0, -1), "Multiple Vacation Payouts.") Then
         cell = "Ensure multiple payouts are not duplicate payments."
     End If
+    
 Next cell
 
     Rows("1:1").Font.Bold = True
@@ -272,12 +302,9 @@ Call UsageLog("Format ALP Report")
 
 Application.ScreenUpdating = True
 
-Application.ActiveWorkbook.SaveAs FileName:="\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Processed (Historic)\ALP Comparisons\" & ActiveSheet.Name & ".xlsx", FileFormat:=51
-
-'Remove spaces in EmpIDs
-'Convert EmpIDs to Text
-'Add Column for actual LML and LMP
-'Loop through cells for special formatting if off
+If MsgBox("Save to the shared drive?", vbYesNo) = vbYes Then
+    Application.ActiveWorkbook.SaveAs FileName:="\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Processed (Historic)\ALP Comparisons\" & ActiveSheet.Name & ".xlsx", FileFormat:=51
+End If
 
 End Sub
 
@@ -518,7 +545,7 @@ Application.ScreenUpdating = True
 End Sub
 
 
-Sub CTL916() 'control As IRibbonControl
+Sub CTL916(control As IRibbonControl)
 
     Dim FileDate As String
 

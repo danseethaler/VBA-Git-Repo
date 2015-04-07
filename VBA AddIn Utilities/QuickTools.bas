@@ -355,7 +355,7 @@ For Each cell In workRange
     
     End If
     
-    cell.Select
+    cell.Offset(1, 0).Select
 
 Next cell
 
@@ -363,8 +363,8 @@ Next cell
 List = Left(List, Len(List) - 3)
 
 'If we've reached the end of the used range, send the active cell to the top of the worksheet
-If Intersect(ActiveCell.Offset(1, 0), ActiveSheet.UsedRange) Is Nothing Then
-    ActiveCell.End(xlUp).Select
+If Intersect(ActiveCell, ActiveSheet.UsedRange) Is Nothing Then
+    ActiveCell.Offset(-1, 0).End(xlUp).Select
 End If
 
 clipboard.SetText List
@@ -1062,7 +1062,6 @@ Debug.Print "C:\Users\" & Environ$("Username") & "\AppData\Roaming\Microsoft\Add
 'Print the user's desktop path
 Debug.Print CreateObject("WScript.Shell").SpecialFolders("Desktop")
 End Sub
-
 
 Sub RemoveDatesAndExtendtions(control As IRibbonControl)
 
