@@ -3,7 +3,7 @@ Option Explicit
 
 Public Sub GetAttachments()
 
-Dim Item As MailItem
+Dim item As MailItem
 Dim Atmt As attachment
 Dim FileName As String
 Dim QueryCount As Integer
@@ -15,15 +15,15 @@ Dim WBook As Workbook
 Dim Excel As Excel.Application
 Dim FullPath As String
 
-Dim Namespace As Outlook.Namespace
-Set Namespace = Application.GetNamespace("MAPI")
+Dim namespace As Outlook.namespace
+Set namespace = Application.GetNamespace("MAPI")
 
-For Each Item In Namespace.GetDefaultFolder(olFolderInbox).items
-If Item.Attachments.Count = 1 And Item.SenderName = "GLOBALHR-PeopleSoft" Then QueryCount = QueryCount + 1
-Next Item
+For Each item In namespace.GetDefaultFolder(olFolderInbox).items
+If item.Attachments.Count = 1 And item.SenderName = "GLOBALHR-PeopleSoft" Then QueryCount = QueryCount + 1
+Next item
 
 If QueryCount < 1 Then
-Set Namespace = Nothing
+Set namespace = Nothing
 Exit Sub
 End If
 
@@ -63,9 +63,9 @@ DirectoryPath = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\"
     
 '*********************************
 'Loop through every email (MailItem) in the primary inbox
-For Each Item In Namespace.GetDefaultFolder(olFolderInbox).items
-    If Item.Attachments.Count = 1 And Item.SenderName = "GLOBALHR-PeopleSoft" Then
-        For Each Atmt In Item.Attachments
+For Each item In namespace.GetDefaultFolder(olFolderInbox).items
+    If item.Attachments.Count = 1 And item.SenderName = "GLOBALHR-PeopleSoft" Then
+        For Each Atmt In item.Attachments
             If InStr(UCase(Atmt.DisplayName), ".XLS") > 0 Then
             FileName = Atmt.FileName
             
@@ -100,7 +100,7 @@ For Each Item In Namespace.GetDefaultFolder(olFolderInbox).items
                     
                 End If
             
-            Item.Delete
+            item.Delete
         Next
 
     End If
@@ -115,7 +115,7 @@ End With
 
 MsgBox QueryCount & " backstop query emails have been processed. " & ValidQueryCount & " queries actually had data."
 
-Set Namespace = Nothing
+Set namespace = Nothing
 Set WBook = Nothing
 Set Excel = Nothing
 

@@ -10,7 +10,7 @@ Sub SaveDITextFileAttachments()
     Dim Outlook As New Outlook.Application
     Dim attachmentEmails As items
     Dim FileName As String
-    Dim processFolder As Outlook.Folder
+    Dim processFolder As Outlook.folder
     Dim i As Integer
     Dim e As Integer
     Dim StoreList As String
@@ -31,13 +31,13 @@ Sub SaveDITextFileAttachments()
     Dim DIWorkbook As Workbook
     Dim WBookName As String
     
-    Dim myNamespace As Outlook.Namespace
+    Dim myNamespace As Outlook.namespace
     Set myNamespace = Application.GetNamespace("MAPI")
     
     'Set process folder to the GSC-DIPayroll Inbox
     On Error Resume Next
-        Set processFolder = myNamespace.Folders("GSC-DIPayroll@ldschurch.org").Folders("Inbox")
-        Set processFolder = myNamespace.Folders("GSC-DIPayroll").Folders("Inbox")
+        Set processFolder = myNamespace.folders("GSC-DIPayroll@ldschurch.org").folders("Inbox")
+        Set processFolder = myNamespace.folders("GSC-DIPayroll").folders("Inbox")
     On Error GoTo 0
     
     'If the GSC-DIPayroll box doesn't exit then exit the sub
@@ -282,9 +282,9 @@ NextRow = DIWorkbook.Sheets(1).UsedRange.SpecialCells(xlLastCell).Row + 1
     attachmentEmails(e).UnRead = False
     
     If processFolder.FolderPath = "\\GSC-DIPayroll@ldschurch.org\Inbox" Then
-        attachmentEmails(e).Move myNamespace.Folders("GSC-DIPayroll@ldschurch.org").Folders("Cabinet")
+        attachmentEmails(e).Move myNamespace.folders("GSC-DIPayroll@ldschurch.org").folders("Cabinet")
     Else
-        attachmentEmails(e).Move myNamespace.Folders("GSC-DIPayroll").Folders("Cabinet")
+        attachmentEmails(e).Move myNamespace.folders("GSC-DIPayroll").folders("Cabinet")
     End If
 
             End If
@@ -329,11 +329,11 @@ End Sub
 Sub MoveDIEmails()
 
     Dim Outlook As New Outlook.Application
-    Dim Namespace As Outlook.Namespace
-    Dim destFolder As Outlook.Folder
-    Dim cabinetFolder As Outlook.Folder
+    Dim namespace As Outlook.namespace
+    Dim destFolder As Outlook.folder
+    Dim cabinetFolder As Outlook.folder
     Dim attachmentEmails As items
-    Dim Item As MailItem
+    Dim item As MailItem
     Dim EmailCount As Integer
     Dim i As Integer
     Dim a As Integer
@@ -348,24 +348,24 @@ If (Date - RecentPPDate()) > 4 Then
     If Continue = vbNo Then Exit Sub
 End If
  
- Set Namespace = Application.GetNamespace("MAPI")
+ Set namespace = Application.GetNamespace("MAPI")
 
 'Set the destination folder to the GSC-DIPayroll Inbox
 On Error Resume Next
- Set destFolder = Namespace.Folders("GSC-DIPayroll@ldschurch.org").Folders("Inbox")
- Set destFolder = Namespace.Folders("GSC-DIPayroll").Folders("Inbox")
+ Set destFolder = namespace.folders("GSC-DIPayroll@ldschurch.org").folders("Inbox")
+ Set destFolder = namespace.folders("GSC-DIPayroll").folders("Inbox")
 On Error GoTo 0
 
 'If the GSC-DIPayroll box doesn't exit then exit the sub
 If destFolder = "" Then
     MsgBox "Please add the GSC-DIPayroll box to your Outlook before running this macro."
-    Set Namespace = Nothing
+    Set namespace = Nothing
 End If
 
 'Set the cabinet folder
 On Error Resume Next
- Set cabinetFolder = Namespace.Folders("GSC-DIPayroll@ldschurch.org").Folders("Cabinet")
- Set cabinetFolder = Namespace.Folders("GSC-DIPayroll").Folders("Cabinet")
+ Set cabinetFolder = namespace.folders("GSC-DIPayroll@ldschurch.org").folders("Cabinet")
+ Set cabinetFolder = namespace.folders("GSC-DIPayroll").folders("Cabinet")
 On Error GoTo 0
 
     'Initiate the collection filters to only process emails with

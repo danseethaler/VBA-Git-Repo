@@ -262,7 +262,7 @@ Loop
 'This line creates the Outlook mail object and assigns it to the designated template.
     Set myOlApp = CreateObject("Outlook.Application")
 'ACTION: Add File Picker to this section
-    Set MyItem = myOlApp.CreateItemFromTemplate("\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\Create Time Process Email Template.oft")
+    Set MyItem = myOlApp.CreateItemFromTemplate("\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\Email Templates\Create Time Process Email Template.oft")
     
 'This section manipulates several of the properties of the template to insert
 'the information on the row the program is processing.
@@ -351,7 +351,8 @@ Sub TimeAmericaErrorReport(control As IRibbonControl)
     With MyItem
         .Attachments.Add ActiveWorkbook.FullName
         .To = "DL-WEL-DIStaff"
-        .CC = "danseethaler@ldschurch.org;awilkins@ldschurch.org;DL-GSC-PrcSvc-PR-EmployeeData@ldschurch.org"
+        .CC = "danseethaler@ldschurch.org;awilkins@ldschurch.org;DL-GSC-PrcSvc-PR-EmployeeData@ldschurch.org;" & _
+                "ashkw@ldschurch.org;ThuesonJJ@ldschurch.org;wrigleyjc@ldschurch.org;WiddisonKL@ldschurch.org;WarrinerTS@ldschurch.org"
         .BCC = ""
         .Subject = .Subject & RecentPP()
         .HTMLBody = Replace(MyItem.HTMLBody, "#Stores", Stores)

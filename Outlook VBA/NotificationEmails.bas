@@ -7,11 +7,9 @@ Sub TLAMProcessingComplete()
     Dim PP As Integer
     
     Set myolApp = CreateObject("Outlook.Application")
-    Set myItem = myolApp.CreateItemFromTemplate("\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\TL and AM Processing Complete.oft")
+    Set myItem = myolApp.CreateItemFromTemplate("\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\Email Templates\TL and AM Processing Complete.oft")
     
-    PP = InputBox("Which PP is this for?")
-    
-    myItem.HTMLBody = Replace(myItem.HTMLBody, "PP20", "PP0" & PP)
+    myItem.HTMLBody = Replace(myItem.HTMLBody, "PP20", "PP" & RecentPP())
     myItem.Display
     
 End Sub
@@ -21,7 +19,7 @@ Sub OffCycleCheckReport()
     Dim myItem As MailItem
     
     Set myolApp = CreateObject("Outlook.Application")
-    Set myItem = myolApp.CreateItemFromTemplate("\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\Off-Cycle Check Report - 12 Month Rolling.oft")
+    Set myItem = myolApp.CreateItemFromTemplate("\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\Email Templates\Off-Cycle Check Report - 12 Month Rolling.oft")
     
     myItem.HTMLBody = Replace(myItem.HTMLBody, "currentmonth", InputBox("What month has been added to this report?"))
     myItem.Attachments.Add "C:\Users\danseethaler\Dropbox\Work\Current Projects\Dashboards\Off-Cycle Dashboard\Off-Cycle Check Dashboard - 12 Month Rolling.xlsm"
@@ -40,7 +38,7 @@ Sub NewEmailToRecipients()
     Set outlookExplorer = Outlook.ActiveExplorer
     Set selection = outlookExplorer.selection
     
-    Set currentEmail = selection.Item(1)
+    Set currentEmail = selection.item(1)
     
     Debug.Print currentEmail.Sender
     

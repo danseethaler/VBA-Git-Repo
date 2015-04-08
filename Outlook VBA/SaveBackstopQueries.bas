@@ -3,9 +3,9 @@ Option Explicit
 
 Public Sub GetAttachments()
 Dim myolApp As Outlook.Application
-Dim myNamespace As Outlook.Namespace
+Dim myNamespace As Outlook.namespace
 Dim Inbox As MAPIFolder
-Dim Item As MailItem
+Dim item As MailItem
 Dim Atmt As attachment
 Dim FileName As String
 Dim Deleted As Integer
@@ -21,12 +21,12 @@ Do Until Deleted = 0
 
 Deleted = 0
 
-For Each Item In Inbox.items
+For Each item In Inbox.items
 
-    If Item.Attachments.Count = 1 Then
-    If Item.Sender.GetExchangeUser().PrimarySmtpAddress = "GLOBALHR-PeopleSoft2@ldschurch.org" Or Item.SenderEmailAddress = "GLOBALHR-PeopleSoft@ldschurch.org" Then
+    If item.Attachments.Count = 1 Then
+    If item.Sender.GetExchangeUser().PrimarySmtpAddress = "GLOBALHR-PeopleSoft2@ldschurch.org" Or item.SenderEmailAddress = "GLOBALHR-PeopleSoft@ldschurch.org" Then
     
-        For Each Atmt In Item.Attachments
+        For Each Atmt In item.Attachments
             
             If InStr(UCase(Atmt.DisplayName), ".XLS") > 0 Then
             
@@ -41,13 +41,13 @@ For Each Item In Inbox.items
                     FileName = Left(FileName, Len(FileName) - 4) & "(" & FileCounter & ").xls"
                 End If
             
-            If Left(Item.Subject, 6) = "Output" Then
+            If Left(item.Subject, 6) = "Output" Then
                 Atmt.SaveAsFile DirectoryPath & FileName
                 Else
-                Atmt.SaveAsFile DirectoryPath & Item.Subject & ".xls"
+                Atmt.SaveAsFile DirectoryPath & item.Subject & ".xls"
             End If
             
-            Item.Delete
+            item.Delete
             
             Deleted = Deleted + 1
             
