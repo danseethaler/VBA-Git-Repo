@@ -3,8 +3,8 @@ Option Explicit
 
 Sub SaveAttachments()
 
-    Dim items, item, myAttachments, myAttachment As Object
-    Dim myolApp As New Outlook.Application
+    Dim items, Item, myAttachments, myAttachment As Object
+    Dim Outlook As New Outlook.Application
     Dim myOlExp As Outlook.Explorer
     Dim selection As Outlook.selection
     Dim Msg As Outlook.MailItem
@@ -32,7 +32,7 @@ Sub SaveAttachments()
 
 '    otherObject.Visible = False
 
-    Set myOlExp = myolApp.ActiveExplorer
+    Set myOlExp = Outlook.ActiveExplorer
     Set selection = myOlExp.selection
 
     FileCounter = 1
@@ -48,10 +48,10 @@ Sub SaveAttachments()
     otherObject.Quit
     Set otherObject = Nothing
      
-    For Each item In selection
-     Set Msg = item
+    For Each Item In selection
+     Set Msg = Item
      
-        Set myAttachments = item.Attachments
+        Set myAttachments = Item.Attachments
         
         If myAttachments.Count > 0 Then
          
@@ -80,10 +80,10 @@ Sub SaveAttachments()
     Next
         
     Set items = Nothing
-    Set item = Nothing
+    Set Item = Nothing
     Set myAttachments = Nothing
     Set myAttachment = Nothing
-    Set myolApp = Nothing
+    Set Outlook = Nothing
     Set myOlExp = Nothing
     Set selection = Nothing
 

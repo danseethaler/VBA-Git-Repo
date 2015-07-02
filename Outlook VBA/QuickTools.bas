@@ -4,7 +4,7 @@ Option Explicit
 Sub CountSelectedEmails()
     Dim outlookExplorer As Outlook.Explorer
     Dim selection As Outlook.selection
-    Dim item As MailItem
+    Dim Item As MailItem
     
     Set outlookExplorer = Outlook.ActiveExplorer
     Set selection = outlookExplorer.selection
@@ -24,7 +24,7 @@ End Sub
 Sub MarkDeletedItemsRead()
 Dim myNamespace As Outlook.namespace
 Dim deletedEmails As items
-Dim item As Object
+Dim Item As Object
 Dim i As Integer
 
     'Set the deletedEmails collection to the unread emails in the default Deleted Items folder
@@ -35,5 +35,11 @@ Dim i As Integer
     For i = deletedEmails.Count To 1 Step -1
         deletedEmails(i).UnRead = False
     Next
+
+End Sub
+
+Sub testInit()
+
+
 
 End Sub

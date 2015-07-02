@@ -25,7 +25,9 @@ todayCriteria = "[ReceivedTime] < '" & Format(Date, "ddddd h:nn AMPM") & "'"
     For n = namespace.folders.Count To 1 Step -1
     
     'Determine if the folder is the user's default inbox folder. If so, skip it.
-    If namespace.folders(n).folders("Inbox").FolderPath <> namespace.GetDefaultFolder(olFolderInbox).FolderPath Then
+    If namespace.folders(n).FolderPath <> "\\SharePoint Lists" Then
+    If namespace.folders(n).folders("Inbox").FolderPath <> namespace.GetDefaultFolder(olFolderInbox).FolderPath And _
+    namespace.folders(n).folders("Inbox").FolderPath <> "\\GSC-VIP-Payroll\Inbox" Then
         
         'Create the collection of emails with only the old emails
         Set toCabinetEmails = namespace.folders(n).folders("Inbox").items.Restrict(todayCriteria)
@@ -71,10 +73,11 @@ todayCriteria = "[ReceivedTime] < '" & Format(Date, "ddddd h:nn AMPM") & "'"
     
     
     End If
-    
+    End If
     
 Next
 
 MsgBox "All set." & vbNewLine & vbNewLine & emailsMoved & " old emails in your accounts have been moved to their respective cabinets."
 
 End Sub
+

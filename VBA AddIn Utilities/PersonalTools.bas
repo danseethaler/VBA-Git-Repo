@@ -470,7 +470,7 @@ Loop
     ActiveSheet.Name = "External Files PP" & RecentPP()
     Columns.AutoFit
     Range("A1").Select
-    ActiveSheet.Move
+    If Sheets.Count > 1 Then ActiveSheet.Move
     
 Cells.EntireColumn.AutoFit
 Rows(1).Font.Bold = True

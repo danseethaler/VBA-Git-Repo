@@ -3,7 +3,7 @@ Option Explicit
 
 Public Sub GetAttachments()
 
-Dim item As MailItem
+Dim Item As MailItem
 Dim Atmt As attachment
 Dim FileName As String
 Dim QueryCount As Integer
@@ -18,9 +18,9 @@ Dim FullPath As String
 Dim namespace As Outlook.namespace
 Set namespace = Application.GetNamespace("MAPI")
 
-For Each item In namespace.GetDefaultFolder(olFolderInbox).items
-If item.Attachments.Count = 1 And item.SenderName = "GLOBALHR-PeopleSoft" Then QueryCount = QueryCount + 1
-Next item
+For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
+If Item.Attachments.Count = 1 And Item.SenderName = "GLOBALHR-PeopleSoft" Then QueryCount = QueryCount + 1
+Next Item
 
 If QueryCount < 1 Then
 Set namespace = Nothing
@@ -63,9 +63,9 @@ DirectoryPath = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\"
     
 '*********************************
 'Loop through every email (MailItem) in the primary inbox
-For Each item In namespace.GetDefaultFolder(olFolderInbox).items
-    If item.Attachments.Count = 1 And item.SenderName = "GLOBALHR-PeopleSoft" Then
-        For Each Atmt In item.Attachments
+For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
+    If Item.Attachments.Count = 1 And Item.SenderName = "GLOBALHR-PeopleSoft" Then
+        For Each Atmt In Item.Attachments
             If InStr(UCase(Atmt.DisplayName), ".XLS") > 0 Then
             FileName = Atmt.FileName
             
@@ -100,7 +100,7 @@ For Each item In namespace.GetDefaultFolder(olFolderInbox).items
                     
                 End If
             
-            item.Delete
+            Item.Delete
         Next
 
     End If

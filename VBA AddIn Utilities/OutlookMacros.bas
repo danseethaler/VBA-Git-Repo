@@ -24,9 +24,16 @@ Dim Message As Outlook.MailItem
 Dim nms As Outlook.Namespace
 Dim Folder As Outlook.MAPIFolder
 Dim itm As Object
-Dim MinDate As Date
+Dim MinDateString As String
+Dim minDate As Date
 
-MinDate = InputBox("What is the earliest date for which you want emails listed?")
+MinDateString = InputBox("What is the earliest date for which you want emails listed?")
+
+If Len(MinDateString) = 6 Then
+    minDate = Left(MinDateString, 2) & "/" & Left(Right(MinDateString, 4), 2) & "/" & Right(MinDateString, 2)
+    Else
+    Exit Sub
+End If
 
 If WorksheetFunction.CountA(Cells) = 0 Then
 
@@ -50,10 +57,11 @@ End If
 Rows(1).Font.Bold = True
 
 Range("A1").Value = "To"
-Range("B1").Value = "From"
-Range("C1").Value = "Sender's Email"
-Range("D1").Value = "Subject"
-Range("E1").Value = "Sent On"
+Range("B1").Value = "To Email"
+Range("C1").Value = "From"
+Range("D1").Value = "Sender's Email"
+Range("E1").Value = "Subject"
+Range("F1").Value = "Sent On"
 
 ActiveColumn = 1
 ActiveRow = 2
@@ -64,14 +72,15 @@ Set Message = itm
 
 On Error Resume Next
 
-If Message.SentOn > MinDate Then
+If Message.SentOn > minDate Then
 
 Cells(ActiveRow, ActiveColumn).Value = Message.To
-Cells(ActiveRow, ActiveColumn + 1).Value = Message.Sender
-Cells(ActiveRow, ActiveColumn + 2).Value = Message.SenderEmailAddress
+Cells(ActiveRow, ActiveColumn + 1).Value = GetSMTPAddressForRecipients(Message)
+Cells(ActiveRow, ActiveColumn + 2).Value = Message.Sender
+Cells(ActiveRow, ActiveColumn + 3).Value = Message.SenderEmailAddress
 If Message.Sender.GetExchangeUser().PrimarySmtpAddressCells <> "" Then Cells(ActiveRow, ActiveColumn + 2).Value = Message.Sender.GetExchangeUser().PrimarySmtpAddress
-Cells(ActiveRow, ActiveColumn + 3).Value = Message.Subject
-Cells(ActiveRow, ActiveColumn + 4).Value = Message.SentOn
+Cells(ActiveRow, ActiveColumn + 4).Value = Message.Subject
+Cells(ActiveRow, ActiveColumn + 5).Value = Message.SentOn
 
 ActiveRow = ActiveRow + 1
 
@@ -90,6 +99,22 @@ End If
 Call ColumnsAutofitCall
 
 End Sub
+
+Function GetSMTPAddressForRecipients(mail As Outlook.MailItem) As String
+    Dim recips As Outlook.Recipients
+    Dim recip As Outlook.Recipient
+    Dim pa As Outlook.PropertyAccessor
+    Const PR_SMTP_ADDRESS As String = _
+        "http://schemas.microsoft.com/mapi/proptag/0x39FE001E"
+    Set recips = mail.Recipients
+    For Each recip In recips
+        Set pa = recip.PropertyAccessor
+        GetSMTPAddressForRecipients = GetSMTPAddressForRecipients & ";" & pa.GetProperty(PR_SMTP_ADDRESS)
+    Next
+    
+    GetSMTPAddressForRecipients = Right(GetSMTPAddressForRecipients, Len(GetSMTPAddressForRecipients) - 1)
+    
+End Function
 
 Sub CreateFromTemplate(control As IRibbonControl) '
     Dim cell As Range
@@ -352,7 +377,8 @@ Sub TimeAmericaErrorReport(control As IRibbonControl)
         .Attachments.Add ActiveWorkbook.FullName
         .To = "DL-WEL-DIStaff"
         .CC = "danseethaler@ldschurch.org;awilkins@ldschurch.org;DL-GSC-PrcSvc-PR-EmployeeData@ldschurch.org;" & _
-                "ashkw@ldschurch.org;ThuesonJJ@ldschurch.org;wrigleyjc@ldschurch.org;WiddisonKL@ldschurch.org;WarrinerTS@ldschurch.org"
+                "ashkw@ldschurch.org;ThuesonJJ@ldschurch.org;wrigleyjc@ldschurch.org;WiddisonKL@ldschurch.org;" & _
+                "MoorePJ@ldschurch.org;GriffinHP@ldschurch.org;WarrinerTS@ldschurch.org"
         .BCC = ""
         .Subject = .Subject & RecentPP()
         .HTMLBody = Replace(MyItem.HTMLBody, "#Stores", Stores)
@@ -406,7 +432,7 @@ With Stores
     .Add Key:="Chula Vista", Item:="mpozo@ldschurch.org;CressallN@ldschurch.org"
     .Add Key:="Colton", Item:="pcampbell@ldschurch.org;MasseyDJ@ldschurch.org"
     .Add Key:="Downtown SLC", Item:="LoseeWe@ldschurch.org;SorensenJE@ldschurch.org"
-    .Add Key:="Federal Way", Item:="Barbara.Hellickson@ldschurch.org;HatfieldJJ@ldschurch.org"
+    .Add Key:="Federal Way", Item:="Barbara.Hellickson@ldschurch.org;ClementGL@ldschurch.org"
     .Add Key:="Harrisville", Item:="MurrayNN@ldschurch.org;ryan.pike@ldschurch.org"
     .Add Key:="Idaho Falls", Item:="jennifer.jensen@ldschurch.org;KelleyAP@ldschurch.org"
     .Add Key:="Las Vegas North", Item:="trshurtleff@ldschurch.org;BondocBL@ldschurch.org"
@@ -426,7 +452,7 @@ With Stores
     .Add Key:="Rexburg", Item:="tracy.smith@ldschurch.org;GlissmeyerKG@ldschurch.org"
     .Add Key:="Richfield", Item:="alicia.murray@ldschurch.org;BaroneMa@ldschurch.org"
     .Add Key:="Sacramento", Item:="btourtillott@ldschurch.org;ThomasTD@ldschurch.org"
-    .Add Key:="Sandy", Item:="stokesmh@ldschurch.org;MontalboMA@ldschurch.org"
+    .Add Key:="Sandy", Item:="krista.loiacono@ldschurch.org;MontalboMA@ldschurch.org"
     .Add Key:="Seattle", Item:="rscook@ldschurch.org;WestBH@ldschurch.org"
     .Add Key:="St George", Item:="RafterySh@ldschurch.org;BaldwinSD@ldschurch.org"
     .Add Key:="Sugarhouse", Item:="PutnamTJ@ldschurch.org;MaradiagaB@ldschurch.org"

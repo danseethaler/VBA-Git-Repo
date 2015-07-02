@@ -102,6 +102,31 @@ Application.ScreenUpdating = True
 
 End Sub
 
+Sub PasteAndDeliminateEmails()
+
+Application.ScreenUpdating = False
+
+    ActiveSheet.Paste
+
+Selection.Replace What:=" - [", Replacement:="", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+        
+    Selection.TextToColumns _
+      Destination:=ActiveCell, _
+      DataType:=xlDelimited, _
+      TextQualifier:=xlDoubleQuote, _
+      ConsecutiveDelimiter:=False, _
+      Tab:=False, _
+      Semicolon:=False, _
+      Comma:=False, _
+      Space:=False, _
+      OtherChar:="]"
+
+Application.ScreenUpdating = True
+
+End Sub
+
 Sub PasteAndDeliminateSpace(control As IRibbonControl)
 
 Application.ScreenUpdating = False

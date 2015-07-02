@@ -144,22 +144,12 @@ For Each cell In Range("F2:F" & LastRow)
 Next cell
 
 Range("G2:G" & LastRow).Delete Shift:=xlToLeft
-
-'Remove Spaces
-Range("D2:D" & LastRow).Replace What:=" ", Replacement:=", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
         
 For Each cell In Range("D2:D" & LastRow)
     If InStr(cell, "-") Then
         cell = -Left(cell, Len(cell) - 1)
     End If
 Next cell
-
-        
-Range("L2:L" & LastRow).Replace What:=" ", Replacement:=", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
 
 Range("C1") = "LMP Hours"
 Range("D1") = "LML Hours"

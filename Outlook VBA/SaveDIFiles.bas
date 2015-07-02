@@ -1,5 +1,79 @@
 Attribute VB_Name = "SaveDIFiles"
 Option Explicit
+
+Sub MoveDIEmails()
+
+    Dim Outlook As New Outlook.Application
+    Dim namespace As Outlook.namespace
+    Dim destFolder As Outlook.folder
+    Dim cabinetFolder As Outlook.folder
+    Dim attachmentEmails As items
+    Dim Item As MailItem
+    Dim EmailCount As Integer
+    Dim i As Integer
+    Dim a As Integer
+    Dim afterPP As String
+    Dim DirectoryPath As String
+    Dim Continue As String
+    Dim PP As Integer
+    
+PP = RecentPP()
+    
+If (Date - RecentPPDate()) > 4 Then
+    Continue = MsgBox("It appears that PP" & PP & " data has already been processed." & vbNewLine & vbNewLine & _
+    "Do you want to continue?", vbYesNo, "Continue?")
+    If Continue = vbNo Then Exit Sub
+End If
+ 
+ Set namespace = Application.GetNamespace("MAPI")
+
+'Set the destination folder to the GSC-DIPayroll Inbox
+On Error Resume Next
+ Set destFolder = namespace.folders("GSC-DIPayroll@ldschurch.org").folders("Inbox")
+ Set destFolder = namespace.folders("GSC-DIPayroll").folders("Inbox")
+On Error GoTo 0
+
+'If the GSC-DIPayroll box doesn't exit then exit the sub
+If destFolder = "" Then
+    MsgBox "Please add the GSC-DIPayroll box to your Outlook before running this macro."
+    Set namespace = Nothing
+End If
+
+'Set the cabinet folder
+On Error Resume Next
+ Set cabinetFolder = namespace.folders("GSC-DIPayroll@ldschurch.org").folders("Cabinet")
+ Set cabinetFolder = namespace.folders("GSC-DIPayroll").folders("Cabinet")
+On Error GoTo 0
+
+'Initiate the collection filters to only process emails with
+'attachements that were received since the beginning of the last pay period end date
+afterPP = "[ReceivedTime] > '" & Format(RecentPPDate(), "ddddd h:nn AMPM") & "'"
+
+Set attachmentEmails = cabinetFolder.items.Restrict(afterPP)
+Set attachmentEmails = attachmentEmails.Restrict("[Attachment] = True")
+
+For a = attachmentEmails.Count To 1 Step -1
+    For i = 1 To attachmentEmails(a).Attachments.Count
+        If InStr(UCase(attachmentEmails(a).Attachments(i).DisplayName), ".TXT") > 0 Then
+            attachmentEmails(a).Move destFolder
+            EmailCount = EmailCount + 1
+            Exit For
+        End If
+    Next i
+Next a
+    
+    'Validate that all files have been removed from the GSC folder.
+    If Dir("\\L12239\CXFUSR\Appl\HR800\PS\Temp\GSC\") <> "" Then
+        MsgBox "There appears to be files/folders within the HR800\PS\Temp\GSC folder. This should be emptied " & _
+            "out before the files for the current pay period are saved."
+        'Open the GSC folder so the extra files can be moved out
+        DirectoryPath = "\\L12239\CXFUSR\Appl\HR800\PS\Temp\GSC\"
+        Shell "C:\WINDOWS\explorer.exe """ & DirectoryPath & "", vbNormalFocus
+    End If
+
+    MsgBox (EmailCount & " email(s) have been moved to the " & destFolder & " folder.")
+    
+End Sub
     
 Sub SaveDITextFileAttachments()
     Dim Continue As String
@@ -13,6 +87,7 @@ Sub SaveDITextFileAttachments()
     Dim processFolder As Outlook.folder
     Dim i As Integer
     Dim e As Integer
+    Dim PP As Integer
     Dim StoreList As String
     Dim AttachmentCounter As Integer
     Dim fdFolder As Office.FileDialog
@@ -34,6 +109,8 @@ Sub SaveDITextFileAttachments()
     Dim myNamespace As Outlook.namespace
     Set myNamespace = Application.GetNamespace("MAPI")
     
+    PP = RecentPP()
+    
     'Set process folder to the GSC-DIPayroll Inbox
     On Error Resume Next
         Set processFolder = myNamespace.folders("GSC-DIPayroll@ldschurch.org").folders("Inbox")
@@ -54,7 +131,7 @@ Sub SaveDITextFileAttachments()
     attachmentEmails.Sort "[ReceivedTime]", True
     
     If (Date - RecentPPDate()) > 4 Then
-        Continue = MsgBox("It appears that PP" & RecentPP() & " data has already been processed." & vbNewLine & vbNewLine & _
+        Continue = MsgBox("It appears that PP" & PP & " data has already been processed." & vbNewLine & vbNewLine & _
         "Do you want to continue?", vbYesNo, "Continue?")
         If Continue = vbNo Then Exit Sub
     End If
@@ -82,7 +159,7 @@ Sub SaveDITextFileAttachments()
     End If
 
     'Set workbook name and directory path
-    WBookName = "DI Email Details - PP" & RecentPP() & ".xlsx"
+    WBookName = "DI Email Details - PP" & PP & ".xlsx"
     
     If Dir("\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\") <> "" Then
     
@@ -131,6 +208,13 @@ If DIWorkbook.Sheets(1).Range("A1").Value = "" Then
     DIWorkbook.Sheets(1).Name = "Email Details"
     DIWorkbook.Sheets.Add After:=Excel.Sheets(1)
     DIWorkbook.Sheets(2).Name = "Errors"
+    Sheets(2).Range("A1") = "Store Name"
+    Sheets(2).Range("B1") = "EmpID"
+    Sheets(2).Range("C1") = "Delete Column"
+    Sheets(2).Range("D1") = "Date Reported"
+    Sheets(2).Range("E1") = "TRC"
+    Sheets(2).Range("F1") = "Hours"
+    Sheets(2).Range("G1") = "Error Message"
     DIWorkbook.Sheets.Add After:=Excel.Sheets(2)
     DIWorkbook.Sheets(3).Name = "File Details"
     DIWorkbook.Sheets(1).Activate
@@ -160,13 +244,13 @@ End If
                 Case "CED": FileName = "Cedar City.txt": AvgSize = 54222
                 Case "CEN": FileName = "Centerville.txt": AvgSize = 99799
                 Case "CHU": FileName = "Chula Vista.txt": AvgSize = 51595
-                Case "COL": FileName = "Colton.txt": AvgSize = 41093
-                Case "TIM": FileName = "DI Manufacturing.txt": AvgSize = 86412
+                Case "FON": FileName = "Fontana.txt": AvgSize = 41093
                 Case "DWT": FileName = "Downtown SLC.txt": AvgSize = 52737
                 Case "FED": FileName = "Federal Way.txt": AvgSize = 38979
                 Case "FWE": FileName = "Federal Way.txt": AvgSize = 38979
                 Case "FWD": FileName = "Federal Way.txt": AvgSize = 38979
                 Case "FW ": FileName = "Federal Way.txt": AvgSize = 38979
+                Case "FWP": FileName = "Federal Way.txt": AvgSize = 38979
                 Case "HAR": FileName = "Harrisville.txt": AvgSize = 125467
                 Case "IDA": FileName = "Idaho Falls.txt": AvgSize = 71727
                 Case "LAS": FileName = "Las Vegas North.txt": AvgSize = 81597
@@ -238,7 +322,12 @@ NextRow = DIWorkbook.Sheets(1).UsedRange.SpecialCells(xlLastCell).Row + 1
     DIWorkbook.Sheets(1).Range("E" & NextRow).Value = attachmentEmails(e).SentOn
     DIWorkbook.Sheets(1).Range("F" & NextRow).Value = oFS.GetFile(strFilename).Datelastmodified
     DIWorkbook.Sheets(1).Range("G" & NextRow).Value = emailAttachments(i).Size
-    DIWorkbook.Sheets(1).Range("H" & NextRow).Value = (emailAttachments(i).Size / AvgSize) - 1
+    
+    If AvgSize = 1 Then
+            DIWorkbook.Sheets(1).Range("H" & NextRow).Value = "Missing average file size."
+        Else
+            DIWorkbook.Sheets(1).Range("H" & NextRow).Value = (emailAttachments(i).Size / AvgSize) - 1
+    End If
     
     'Highlight the cell color if the variance is greater or less than 30%
     If DIWorkbook.Sheets(1).Range("H" & NextRow).Value > 0.3 Or DIWorkbook.Sheets(1).Range("H" & NextRow).Value < -0.3 Then
@@ -325,80 +414,6 @@ NextRow = DIWorkbook.Sheets(1).UsedRange.SpecialCells(xlLastCell).Row + 1
      
 End Sub
 
-
-Sub MoveDIEmails()
-
-    Dim Outlook As New Outlook.Application
-    Dim namespace As Outlook.namespace
-    Dim destFolder As Outlook.folder
-    Dim cabinetFolder As Outlook.folder
-    Dim attachmentEmails As items
-    Dim item As MailItem
-    Dim EmailCount As Integer
-    Dim i As Integer
-    Dim a As Integer
-    Dim afterPP As String
-    Dim holdsAttachment As String
-    Dim DirectoryPath As String
-    Dim Continue As String
-    
-If (Date - RecentPPDate()) > 4 Then
-    Continue = MsgBox("It appears that PP" & RecentPP() & " data has already been processed." & vbNewLine & vbNewLine & _
-    "Do you want to continue?", vbYesNo, "Continue?")
-    If Continue = vbNo Then Exit Sub
-End If
- 
- Set namespace = Application.GetNamespace("MAPI")
-
-'Set the destination folder to the GSC-DIPayroll Inbox
-On Error Resume Next
- Set destFolder = namespace.folders("GSC-DIPayroll@ldschurch.org").folders("Inbox")
- Set destFolder = namespace.folders("GSC-DIPayroll").folders("Inbox")
-On Error GoTo 0
-
-'If the GSC-DIPayroll box doesn't exit then exit the sub
-If destFolder = "" Then
-    MsgBox "Please add the GSC-DIPayroll box to your Outlook before running this macro."
-    Set namespace = Nothing
-End If
-
-'Set the cabinet folder
-On Error Resume Next
- Set cabinetFolder = namespace.folders("GSC-DIPayroll@ldschurch.org").folders("Cabinet")
- Set cabinetFolder = namespace.folders("GSC-DIPayroll").folders("Cabinet")
-On Error GoTo 0
-
-    'Initiate the collection filters to only process emails with
-    'attachements that were received since the beginning of the last pay period end date
-    afterPP = "[ReceivedTime] > '" & Format(RecentPPDate(), "ddddd h:nn AMPM") & "'"
-    holdsAttachment = "[Attachment] = True"
-
-Set attachmentEmails = cabinetFolder.items.Restrict(afterPP)
-Set attachmentEmails = attachmentEmails.Restrict(holdsAttachment)
-
-For a = attachmentEmails.Count To 1 Step -1
-    For i = 1 To attachmentEmails(a).Attachments.Count
-        If InStr(UCase(attachmentEmails(a).Attachments(i).DisplayName), ".TXT") > 0 Then
-            attachmentEmails(a).Move destFolder
-            EmailCount = EmailCount + 1
-            Exit For
-        End If
-    Next i
-Next a
-    
-    'Validate that all files have been removed from the GSC folder.
-    If Dir("\\L12239\CXFUSR\Appl\HR800\PS\Temp\GSC\") <> "" Then
-        MsgBox "There appears to be files/folders within the HR800\PS\Temp\GSC folder. This should be emptied " & _
-            "out before the files for the current pay period are saved."
-        'Open the GSC folder so the extra files can be moved out
-        DirectoryPath = "\\L12239\CXFUSR\Appl\HR800\PS\Temp\GSC\"
-        Shell "C:\WINDOWS\explorer.exe """ & DirectoryPath & "", vbNormalFocus
-    End If
-
-    MsgBox (EmailCount & " email(s) have been moved to the " & destFolder & " folder.")
-    
-End Sub
-
 Public Function InstrLike(Strings As String, Pattern As String) As String
 Dim k As Long
 Dim Answer As String
@@ -411,7 +426,6 @@ For k = 1 To Len(Strings) - Len(Pattern)
 Next k
 
 End Function
-
 
 Function RecentPP() As Integer
 Dim PP01 As Date
