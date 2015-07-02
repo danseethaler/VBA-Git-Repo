@@ -78,8 +78,6 @@ End If
         
 Next cell
 
-Call UsageLog("EmpID to Text")
-
 Application.ScreenUpdating = True
 
 'MsgBox (EmpIDCount & " EmpID(s) converted to text.")
@@ -152,8 +150,6 @@ If IsNumeric(cell) Then
 End If
         
 Next cell
-
-Call UsageLog("SSN to Text")
 
 'MsgBox (SSNCount & " SSN(s) converted to text.")
 
@@ -293,14 +289,53 @@ End If
         .Borders(xlInsideVertical).LineStyle = xlNone
         .Borders(xlInsideHorizontal).LineStyle = xlNone
     End With
+
+Dim parameter As IRibbonControl
+Call ColumnsAutofit(parameter)
     
-    Call ColumnsAutofitCall
-
-Call UsageLog("Format PeopleSoft Query")
-
 Range("A1").Select
 
 Application.ScreenUpdating = True
+
+End Sub
+
+Sub ColumnsAutofit(control As IRibbonControl)
+Dim MinWidth As Integer
+Dim MaxWidth As Integer
+Dim ColumnCount As Integer
+Dim ActiveColumn As Integer
+
+ColumnCount = Range("A1:" & ActiveSheet.UsedRange.SpecialCells(xlCellTypeLastCell).Address).Columns.Count
+
+On Error Resume Next
+
+Columns.AutoFit
+
+If Err = 1004 Then
+MsgBox "The autofit function will not work on this sheet. It may be protected.", vbInformation
+Exit Sub
+ElseIf Err <> 0 Then
+MsgBox "Error: " & Err.Number
+End If
+
+'Set Variables
+    MinWidth = 12
+    MaxWidth = 35
+
+For ActiveColumn = 1 To ColumnCount Step 1
+
+    If Columns(ActiveColumn).ColumnWidth < MinWidth Then
+        'Columns(ActiveColumn).ColumnWidth = MinWidth
+    ElseIf Columns(ActiveColumn).ColumnWidth > MaxWidth Then
+        Columns(ActiveColumn).ColumnWidth = MaxWidth
+    End If
+
+If Columns(ActiveColumn).ColumnWidth < 35 Then _
+Columns(ActiveColumn).ColumnWidth = Columns(ActiveColumn).ColumnWidth + 2
+
+Next
+
+Rows.AutoFit
 
 End Sub
 
@@ -403,16 +438,9 @@ Set formatEmpID = cell
 
 End Function
 
-
 Sub ReopenUnsavedWorkbook(control As IRibbonControl)
     Dim ConfirmSub
     Dim openWorkbook As String
-    
-    'ConfirmSub = MsgBox("Do you want to close this workbook without saving?", vbYesNo + vbDefaultButton2 + vbCritical, "Confirm Close")
-    
-'    If ConfirmSub = vbNo Then
-'        Exit Sub
-'    End If
 
     openWorkbook = ActiveWorkbook.FullName
 
@@ -421,18 +449,6 @@ Sub ReopenUnsavedWorkbook(control As IRibbonControl)
     Application.DisplayAlerts = True
     
     Application.Workbooks.Open (openWorkbook)
-    
-Call UsageLog("ReOpen No Save")
-
-End Sub
-
-Sub KillWorkbook(control As IRibbonControl)
-
-    Application.DisplayAlerts = False
-        ActiveWorkbook.Close (True)
-    Application.DisplayAlerts = True
-    
-If Workbooks.Count = 0 Then Application.Quit
 
 End Sub
 
@@ -531,19 +547,8 @@ For Each cell In workRange
     End If
 
 Next cell
-Call UsageLog("Reverse Name")
 
 'MsgBox NameCounter & " name(s) were reformatted to 'First Last' format."
-
-End Sub
-
-Sub CopyWorkSheet(control As IRibbonControl)
-
-If IsEmpty(ActiveSheet) Then Exit Sub
-
-ActiveSheet.Copy After:=ActiveSheet
-
-Call UsageLog("Copy Worksheet")
 
 End Sub
 
@@ -551,12 +556,6 @@ Sub FormulastoValues(control As IRibbonControl)
 Dim workRange As Range
 Dim intArea As Integer
 Dim rngCell As Range
-'Dim continue As String
-'
-'continue = MsgBox("Would you like to convert all formulas in your selection to values?", _
-'            vbYesNo, "Convert Formulas to Values")
-'
-'    If continue = vbNo Then Exit Sub
     
     Set workRange = Selection
     Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
@@ -593,8 +592,6 @@ On Error Resume Next
     
         For intArea = 1 To workRange.Areas.Count
             With workRange.Areas(intArea)
-                'Debug.Print WorkRange.Areas(intArea).Address
-               ' .NumberFormat = "General"
                 .Value = .Value
             End With
         Next
@@ -624,141 +621,76 @@ On Error Resume Next
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
 
-Call UsageLog("Formulas to Values")
-
 'MsgBox (WorkRange.Cells.Count & " formula(s) converted to values.")
 
 End Sub
 
-Sub DeleteSheet(control As IRibbonControl)
-Dim ws As Worksheet
-Application.DisplayAlerts = False
+Sub CreateDecoder(control As IRibbonControl)
+'SQL - Create a decoder based on the
 
-For Each ws In ActiveWindow.SelectedSheets
+Dim workRange As Range
+Dim cell As Range
+Dim Expression As String
+Dim FieldName As String
+Dim IncludeCode As String
+Dim clipboard As MSForms.DataObject
+Set clipboard = New MSForms.DataObject
 
-ws.Delete
+If Selection.Cells.Count > 200 Then Msgobox "Too many cells selected.": Exit Sub
+If Selection.Columns.Count <> 2 Then Msgobox "Only two columns can be selected.":  Exit Sub
+If Selection.Areas.Count <> 1 Then Msgobox "Only one area can be selected.":  Exit Sub
 
-Next ws
+IncludeCode = MsgBox("Do you want to include the field value in the decoder?", vbYesNo)
 
+FieldName = InputBox("Please enter the field name to be deconded.", "Field Name")
+    
+    Expression = "CASE " & FieldName & vbNewLine
+    
+For Each cell In Selection
 
-'Select Case ActiveSheet.Index
-'Case Is = 1: ActiveSheet.Delete
-'Case Else: Sheets(ActiveSheet.Index - 1).Activate
-'    Sheets(ActiveSheet.Index + 1).Delete
-'End Select
+cell = Replace(cell, "'", "")
+cell = Replace(cell, "--", "-")
 
-Application.DisplayAlerts = True
+If Left(cell.Address, 2) = Left(Selection.Columns(1).Address, 2) Then
 
-Call UsageLog("Delete Sheet")
-
-End Sub
-
-Sub SwapTrailingNegative(control As IRibbonControl)
-Dim rng As Range
-Dim WorkRng As Range
-'Convert cells with a trailing negative to a negative value
-
-Application.ScreenUpdating = False
-
-On Error Resume Next
-'Set Workrng
-Select Case Selection.Count
-    Case Is > 1: Set WorkRng = Selection.SpecialCells(xlCellTypeConstants)
-    Case 1
-        If IsNumeric(Selection) Then
-            Set WorkRng = Selection
-        End If
-End Select
-
-'Error Handling
-    If Err <> 0 Then
-        MsgBox "Please select a valid range.", vbCritical
-        Exit Sub
-    End If
-
-'Perform Action
-For Each rng In WorkRng
-
-    If Right(rng, 1) = "-" And IsNumeric(rng) Then
-        rng = -Left(rng, Len(rng) - 1)
+    If WorksheetFunction.IsText(cell) Then
+        Expression = Expression & "  WHEN '" & cell & "' "
+        Else
+        Expression = Expression & "  WHEN " & cell & " "
     End If
     
-    If IsNumeric(rng) Then
-        rng.Style = "Comma"
-    End If
+    Else
+
+    If WorksheetFunction.IsText(cell) Then
     
-Next
-
-Call UsageLog("Swap Trailing Negative")
-
-Application.ScreenUpdating = True
-
-End Sub
-
-Sub ShowDirectoryItems(control As IRibbonControl)
-    Dim Directory As String
-    Dim FileName As String
-    Dim KeepExtensions As String
-    Dim oFS As Object
+            If IncludeCode = vbYes Then
+                Expression = Expression & " THEN '" & cell.Offset(0, -1) & " - " & cell & "'" & vbNewLine
+            Else
+                Expression = Expression & " THEN '" & cell & "'" & vbNewLine
+            End If
     
-    Set oFS = CreateObject("Scripting.FileSystemObject")
-
-Application.ScreenUpdating = False
-
-    Worksheets.Add
-
-    With Application.FileDialog(msoFileDialogFolderPicker)
-        .Title = "Select the directory path."
-        .InitialFileName = CreateObject("WScript.Shell").SpecialFolders("Desktop")
-        .Show
+        Else
+    
+            If IncludeCode = vbYes Then
+                Expression = Expression & " THEN '" & cell.Offset(0, -1) & " - " & cell & "" & vbNewLine
+            Else
+                Expression = Expression & " THEN '" & cell & "'" & vbNewLine
+            End If
         
-    Select Case .SelectedItems.Count
-        Case Is = 0: GoTo EndEarly
-        Case Is = 1: Directory = .SelectedItems(1) & "\"
-    End Select
+    End If
     
-    End With
-
-    KeepExtensions = MsgBox("Would you like to keep the file extensions?", vbYesNo, "Keep Extensions?")
-
-    FileName = Dir(Directory) ' + vbHidden + vbSystem)
-    
-    Range("A1") = "File Name"
-    Range("B1") = "File Size"
-    Range("C1") = "Last Modified"
-    
-    Do While FileName <> ""
-        ActiveCell.Offset(1, 0).Select
-        ActiveCell.Offset(0, 1).Value = oFS.GetFile(Directory & FileName).Size
-        ActiveCell.Offset(0, 2).Value = oFS.GetFile(Directory & FileName).DateLastModified
-        If KeepExtensions = vbNo Then FileName = Left(FileName, InStrRev(FileName, ".") - 1)
-        ActiveCell = FileName
-        FileName = Dir
-    Loop
-    
-If KeepExtensions = vbNo Then
-
-    With Range(Selection, Selection.End(xlUp))
-    .Replace What:=" ?-?-????", Replacement:="", LookAt:=xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
-    .Replace What:=" ??-?-????", Replacement:="", LookAt:=xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
-    .Replace What:=" ??-??-????", Replacement:="", LookAt:=xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
-    .Replace What:=" ?-??-????", Replacement:="", LookAt:=xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
-    End With
-    
-ActiveCell.End(xlUp).Select
-
 End If
-    
-EndEarly:
 
-    Set oFS = Nothing
+Next cell
 
-Application.ScreenUpdating = True
+Expression = Expression & "  ELSE " & FieldName & vbNewLine & "END"
+
+clipboard.SetText Expression
+clipboard.PutInClipboard
 
 End Sub
 
-
-Sub RemoveLeadingSpaces()
+Sub RemoveLeadingSpaces(control As IRibbonControl)
 Dim cell As Range
 
 For Each cell In Selection
@@ -767,14 +699,6 @@ For Each cell In Selection
         Loop
 Next cell
 
-End Sub
-
-Sub MakeProper()
-Dim cell As Range
-
-For Each cell In Selection
-    cell.Value = WorksheetFunction.Proper(cell)
-Next
 End Sub
 
 Sub RoundTwo(control As IRibbonControl)
@@ -795,300 +719,6 @@ For Each cell In Intersect(Selection.SpecialCells(xlCellTypeConstants), Selectio
     End If
 
 Next
-End Sub
-
-
-Sub GoToRow(control As IRibbonControl, GoToRow As Integer)
-
-'RowNumber = InputBox("What row number would you like to go to?", "RowNum")
-Cells(GoToRow, 1).EntireRow.Select
-
-Do Until Intersect(ActiveWindow.VisibleRange, ActiveCell) Is Nothing
-ActiveWindow.SmallScroll Down:=1
-Loop
-
-ActiveWindow.SmallScroll Up:=1
-
-End Sub
-
-Sub PasteAndRemoveDuplicates(control As IRibbonControl)
-
-On Error Resume Next
-
-    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-        :=False, Transpose:=False
-    Application.CutCopyMode = False
-    Selection.RemoveDuplicates Columns:=1, Header:=xlNo
-
-End Sub
-
-Sub RemoveTrailingSpaces(control As IRibbonControl)
-Dim cell As Range
-
-For Each cell In Intersect(Selection.SpecialCells(xlCellTypeConstants), Selection.Parent.UsedRange)
-
-    Do Until Right(cell, 1) <> " "
-        cell = Left(cell, Len(cell) - 1)
-    Loop
-
-Next
-
-End Sub
-
-Sub CountDuplicates(control As IRibbonControl)
-Dim cell As Range
-Dim workRange As Range
-Dim UniqueCount As String
-Dim UniqueItems As Integer
-
-    If Selection.Cells.Count = 1 Then
-    
-    Exit Sub
-    
-    ElseIf Selection.Cells.Count > 1 Then
-
-        Set workRange = Selection.SpecialCells(xlConstants)
-        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
-    
-    End If
-    
-    If workRange Is Nothing Then: MsgBox "Please select a valid range.": Exit Sub
-
-For Each cell In workRange
-    If cell.Row <> 1 Then
-    If InStr(1, UniqueCount, cell) = 0 Then
-    UniqueCount = UniqueCount & cell.Value & " " & Application.WorksheetFunction.CountIf(workRange, cell) & vbNewLine
-    UniqueItems = UniqueItems + 1
-    End If
-    End If
-Next cell
-
-MsgBox ("Number of Unique Items: " & UniqueItems)
-
-End Sub
-
-Sub CountListDuplicates() 'control As IRibbonControl
-Dim cell As Range
-Dim workRange As Range
-Dim UniqueCount As String
-Dim UniqueItems As Integer
-
-    If Selection.Cells.Count = 1 Then
-    
-    Exit Sub
-    
-    ElseIf Selection.Cells.Count > 1 Then
-
-        Set workRange = Selection.SpecialCells(xlConstants)
-        Set workRange = Intersect(workRange, workRange.Parent.UsedRange)
-    
-    End If
-    
-    If workRange Is Nothing Then: MsgBox "Please select a valid range.": Exit Sub
-
-For Each cell In workRange
-    If cell.Row <> 1 Then
-    If InStr(1, UniqueCount, cell) = 0 Then
-    UniqueCount = UniqueCount & cell.Value & " " & Application.WorksheetFunction.CountIf(workRange, cell) & vbNewLine
-    UniqueItems = UniqueItems + 1
-    End If
-    If Len(UniqueCount) > 1000 Then: MsgBox ("This selection has way too many unique values."): Exit Sub
-    End If
-Next cell
-
-MsgBox (UniqueCount & vbNewLine & "Number of Unique Items: " & UniqueItems)
-
-End Sub
-
-
-Sub ListCriteriaTest()
-
-Dim cell As Range
-Dim Message As String
-Dim List As String
-Dim clipboard As MSForms.DataObject
-Set clipboard = New MSForms.DataObject
-
-On Error Resume Next
-
-    If Selection.Cells.Count = 1 Then
-        If Not IsEmpty(ActiveCell) And Not ActiveCell.HasFormula Then
-        
-        Do Until Len(Message) - 3 > 245
-            If ActiveCell.EntireRow.Hidden <> True Then
-            If InStr(1, ActiveCell, cell) = 0 And Not IsEmpty(ActiveCell) Then
-                Message = Message & ActiveCell.Value & "','"
-            End If
-            End If
-        ActiveCell.Offset(1, 0).Select
-        
-        If IsEmpty(ActiveCell) Then Exit Do
-        
-        Loop
-        
-        End If
-        
-    End If
-            
-If Len(Left(Message, Len(Message) - 3)) > 255 Then
-MsgBox ("Each list member in PeopleSoft can contain a maximum of 28 EmplIDs." & vbNewLine & vbNewLine & _
-    "Please shrink your selection size and then add multiple selections to the PeopleSoft list members."), vbCritical
-Exit Sub
-End If
-
-Message = Left(Message, Len(Message) - 3)
-
-clipboard.SetText Message
-clipboard.PutInClipboard
-
-MsgBox ("This list has been copied to your clipboard." & vbNewLine & vbNewLine & _
-        "You can paste it into the PeopleSoft list members to add.")
-        
-Call UsageLog("List Criteria")
-
-End Sub
-
-Sub SectionData(control As IRibbonControl)
-Dim Continue As String
-
-If ActiveCell.End(xlDown).Row > 1000 Then
-Continue = MsgBox("Over 1000 records found." & vbNewLine & vbNewLine & "Do you want to proceed?", vbYesNo)
-If Continue = vbNo Then Exit Sub
-End If
-
-Application.ScreenUpdating = False
-
-Do Until IsEmpty(ActiveCell)
-
-    If ActiveCell.Row = 1 Then ActiveCell.Offset(1, 0).Select
-    If ActiveCell.Row = 2 Then ActiveCell.Offset(1, 0).Select
-        
-    If ActiveCell = ActiveCell.Offset(-1, 0) Or IsEmpty(ActiveCell.Offset(-1, 0)) Then
-    
-    ElseIf ActiveCell <> ActiveCell.Offset(-1, 0) Then
-        Rows(ActiveCell.Row & ":" & ActiveCell.Row).Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
-    End If
-    
-        ActiveCell.Offset(1, 0).Select
-Loop
-
-Application.ScreenUpdating = True
-
-Cells(1, ActiveCell.Column).Select
-
-Call UsageLog("Section Data")
-
-End Sub
-
-Sub test()
-
-Dim BUSheet As Integer
-
-For BUSheet = 1 To ActiveWorkbook.Sheets.Count
-Sheets(BUSheet).Name = Replace(Sheets(BUSheet).Name, "Business Unit = ", "")
-Next BUSheet
-
-End Sub
-
-Sub FormatCharts(control As IRibbonControl)
-Dim ChartNum As Integer
-
-If ActiveSheet.ChartObjects.Count < 1 Then Exit Sub
-ActiveSheet.ChartObjects(1).Activate
-
-For ChartNum = 1 To ActiveSheet.ChartObjects.Count
-
-ActiveSheet.ChartObjects(ChartNum).Height = ActiveChart.Parent.Height
-ActiveSheet.ChartObjects(ChartNum).Width = ActiveChart.Parent.Width
-
-ActiveSheet.ChartObjects(ChartNum).Top = 30
-
-Next ChartNum
-
-Application.SendKeys "{Esc}"
-
-End Sub
-
-Sub ConvertPhoneNumbers(control As IRibbonControl)
-
-With Intersect(Selection, ActiveSheet.UsedRange)
-    .Replace What:="(", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    .Replace What:=")", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    .Replace What:="-", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    .Replace What:=" ", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    .NumberFormat = "[<=9999999]###-####;(###) ###-####"
-End With
-
-End Sub
-
-Sub GoToBlanks(control As IRibbonControl)
-Selection.SpecialCells(xlCellTypeBlanks).Select
-End Sub
-
-Sub RemoveDates(control As IRibbonControl)
-
-With Intersect(Selection, ActiveSheet.UsedRange)
-    .Replace What:=" ??-??-????", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    .Replace What:=" ?-??-????", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    .Replace What:=" ??-?-????", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    .Replace What:=" ?-?-????", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    .Replace What:=".txt", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-End With
-
-End Sub
-
-Sub SystemDirectoryPaths()
-'Print the user's default AddIn folder
-Debug.Print "C:\Users\" & Environ$("Username") & "\AppData\Roaming\Microsoft\AddIns"
-
-'Print the user's desktop path
-Debug.Print CreateObject("WScript.Shell").SpecialFolders("Desktop")
-End Sub
-
-Sub RemoveDatesAndExtendtions(control As IRibbonControl)
-
-    Selection.Replace What:=" ??-??-????", Replacement:="", LookAt:= _
-        xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    Selection.Replace What:=" ?-??-????", Replacement:="", LookAt:=xlPart _
-        , SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    Selection.Replace What:=" ??-?-????", Replacement:="", LookAt:= _
-        xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    Selection.Replace What:=" ?-?-????", Replacement:="", LookAt:= _
-        xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    Selection.Replace What:=".txt", Replacement:="", LookAt:=xlPart _
-        , SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    Selection.Replace What:=".pdf", Replacement:="", LookAt:=xlPart _
-        , SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    Selection.Replace What:=".xls", Replacement:="", LookAt:=xlPart _
-        , SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-    Selection.Replace What:=".xlsx", Replacement:="", LookAt:=xlPart _
-        , SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
 End Sub
 
 Sub ListProcedures()
@@ -1122,4 +752,3 @@ Sub ListProcedures()
     newWB.Sheets(1).Columns.AutoFit
 
 End Sub
-

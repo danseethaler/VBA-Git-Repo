@@ -5,14 +5,14 @@ Option Explicit
 'username, subroutine performed, and when they used it.
 
 Sub UsageLog(SubName As String)
-Dim DirectoryPath As String
+Dim directoryPath As String
 On Error Resume Next
 
 If Environ("username") = "danielseethaler" Or Environ("username") = "danseethaler" Then Exit Sub
 
-    DirectoryPath = "\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\"
+    directoryPath = "\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\"
 
-    Open DirectoryPath & "Usage Log.txt" For Append As #1
+    Open directoryPath & "Usage Log.txt" For Append As #1
         If Err <> 0 Then GoTo NextSub
     Print #1, SubName & "," & Environ("username") & "," & Now
     Close #1
@@ -21,9 +21,9 @@ NextSub:
     
     Err = 0
     
-    DirectoryPath = "\\N0053_SERVER\GSCUSR\SHARED\HR Processing Services\Utilities\"
+    directoryPath = "\\N0053_SERVER\GSCUSR\SHARED\HR Processing Services\Utilities\"
 
-    Open DirectoryPath & "Usage Log.txt" For Append As #1
+    Open directoryPath & "Usage Log.txt" For Append As #1
         If Err <> 0 Then Exit Sub
     Print #1, SubName & "," & Environ("username") & "," & Now
     Close #1

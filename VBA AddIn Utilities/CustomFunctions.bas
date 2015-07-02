@@ -25,6 +25,15 @@ RandPhone = WorksheetFunction.RandBetween(100, 999) & "-" & WorksheetFunction.Ra
 
 End Function
 
+Public Function NextPPEndDate(parameterDate As Date)
+Dim daysSinceLastPP As Integer
+
+daysSinceLastPP = (parameterDate - 38366) Mod 14
+
+NextPPEndDate = parameterDate + (14 - daysSinceLastPP)
+
+End Function
+
 Public Function RandName() As String
 Dim Location As Integer
 Dim FirstNames As String
@@ -495,6 +504,7 @@ Do Until lastPPEndDate = PP01
 Loop
 
 End Function
+
  
 Public Sub ExportSourceFiles()
 

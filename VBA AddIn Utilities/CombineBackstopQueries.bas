@@ -2,26 +2,26 @@ Attribute VB_Name = "CombineBackstopQueries"
 Option Explicit
 
 Sub CombineBackstopQueries()
-Dim DirectoryPath As String
-Dim FileName As String
+Dim directoryPath As String
+Dim fileName As String
 
 Application.ScreenUpdating = False
 
-DirectoryPath = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\Backstop Queries\"
+directoryPath = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\Backstop Queries\"
 
-FileName = Dir(DirectoryPath, vbReadOnly) ' + vbHidden)
+fileName = Dir(directoryPath, vbReadOnly) ' + vbHidden)
 
 'Delete empty workbooks
-Do While FileName <> ""
+Do While fileName <> ""
 
 
-Workbooks.Open DirectoryPath & FileName
+Workbooks.Open directoryPath & fileName
 
 If ActiveSheet.Range("B1") = " 0" Then
 
         ActiveWorkbook.Close
         
-        Kill DirectoryPath & FileName
+        Kill directoryPath & fileName
         
         Else
         
@@ -29,7 +29,7 @@ If ActiveSheet.Range("B1") = " 0" Then
 
 End If
 
-FileName = Dir
+fileName = Dir
 
 Loop
 
@@ -38,26 +38,26 @@ Loop
 
 Workbooks.Add
 
-    ActiveWorkbook.SaveAs FileName:= _
+    ActiveWorkbook.SaveAs fileName:= _
         "C:\Users\danseethaler\Desktop\Backstop Queries\Quality Errors " & Replace(Date, "/", "-") & ".xlsx", _
         FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
 
-FileName = Dir(DirectoryPath, vbReadOnly) ' + vbHidden)
+fileName = Dir(directoryPath, vbReadOnly) ' + vbHidden)
 
-Do While FileName <> ""
+Do While fileName <> ""
 
-If Left(FileName, 14) <> "Quality Errors" Then
-Workbooks.Open DirectoryPath & FileName
+If Left(fileName, 14) <> "Quality Errors" Then
+Workbooks.Open directoryPath & fileName
 
 ActiveSheet.Name = Left(ActiveWorkbook.Name, 30)
 
 ActiveSheet.Move After:=Workbooks("Quality Errors " & Replace(Date, "/", "-") & ".xlsx").Sheets(1)
 
-Kill DirectoryPath & FileName
+Kill directoryPath & fileName
 
 End If
 
-FileName = Dir
+fileName = Dir
 
 Loop
 
