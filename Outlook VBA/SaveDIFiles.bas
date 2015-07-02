@@ -208,13 +208,14 @@ If DIWorkbook.Sheets(1).Range("A1").Value = "" Then
     DIWorkbook.Sheets(1).Name = "Email Details"
     DIWorkbook.Sheets.Add After:=Excel.Sheets(1)
     DIWorkbook.Sheets(2).Name = "Errors"
-    Sheets(2).Range("A1") = "Store Name"
-    Sheets(2).Range("B1") = "EmpID"
-    Sheets(2).Range("C1") = "Delete Column"
-    Sheets(2).Range("D1") = "Date Reported"
-    Sheets(2).Range("E1") = "TRC"
-    Sheets(2).Range("F1") = "Hours"
-    Sheets(2).Range("G1") = "Error Message"
+    DIWorkbook.Sheets(2).Range("A1") = "Store Name"
+    DIWorkbook.Sheets(2).Range("B1") = "EmpID"
+    DIWorkbook.Sheets(2).Range("C1") = "Delete Column"
+    DIWorkbook.Sheets(2).Range("D1") = "Date Reported"
+    DIWorkbook.Sheets(2).Range("E1") = "TRC"
+    DIWorkbook.Sheets(2).Range("F1") = "Hours"
+    DIWorkbook.Sheets(2).Range("G1") = "Error Message"
+    DIWorkbook.Sheets(2).Range("A1:G1").Font.Bold = True
     DIWorkbook.Sheets.Add After:=Excel.Sheets(2)
     DIWorkbook.Sheets(3).Name = "File Details"
     DIWorkbook.Sheets(1).Activate
@@ -244,7 +245,7 @@ End If
                 Case "CED": FileName = "Cedar City.txt": AvgSize = 54222
                 Case "CEN": FileName = "Centerville.txt": AvgSize = 99799
                 Case "CHU": FileName = "Chula Vista.txt": AvgSize = 51595
-                Case "FON": FileName = "Fontana.txt": AvgSize = 41093
+                Case "FON": FileName = "Fontana.txt": AvgSize = 70093
                 Case "DWT": FileName = "Downtown SLC.txt": AvgSize = 52737
                 Case "FED": FileName = "Federal Way.txt": AvgSize = 38979
                 Case "FWE": FileName = "Federal Way.txt": AvgSize = 38979

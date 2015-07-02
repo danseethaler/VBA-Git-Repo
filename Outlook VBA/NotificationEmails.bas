@@ -38,7 +38,7 @@ Sub OffCycleCheckReport()
     Set myItem = Outlook.CreateItemFromTemplate("\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Desk Manual (Information)\Email Templates\Off-Cycle Check Report - 12 Month Rolling.oft")
     
     myItem.HTMLBody = Replace(myItem.HTMLBody, "currentmonth", InputBox("What month has been added to this report?"))
-    myItem.Attachments.Add "C:\Users\danseethaler\Dropbox\Work\Current Projects\Dashboards\Off-Cycle Dashboard\Off-Cycle Check Dashboard - 12 Month Rolling.xlsm"
+    myItem.Attachments.Add "\\CHQPVUN0066\FINUSR\SHARED\FIN_PYRL\2_Payroll Time & Labor Absence Management\Processed (Historic)\On-line Check Matrix\Off-Cycle Check Dashboard - 12 Month Rolling.xlsm"
     myItem.Display
     
     MsgBox ("Make sure to add this report to the SharePoint Team site.")

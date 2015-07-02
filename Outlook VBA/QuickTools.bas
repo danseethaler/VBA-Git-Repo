@@ -21,25 +21,29 @@ Sub CountSelectedEmails()
 
 End Sub
 
-Sub MarkDeletedItemsRead()
-Dim myNamespace As Outlook.namespace
-Dim deletedEmails As items
-Dim Item As Object
-Dim i As Integer
 
-    'Set the deletedEmails collection to the unread emails in the default Deleted Items folder
-    Set myNamespace = Application.GetNamespace("MAPI")
-    Set deletedEmails = myNamespace.GetDefaultFolder(olFolderDeletedItems).items.Restrict("[UnRead] = True")
+Sub NewEmailToRecipients()
+    Dim currentEmail As MailItem
+    Dim outlookExplorer As Outlook.Explorer
+    Dim selection As Outlook.selection
+    Dim newEmail As MailItem
     
-    'Iterate through the emails in reverse and change the UnRead property to False
-    For i = deletedEmails.Count To 1 Step -1
-        deletedEmails(i).UnRead = False
-    Next
-
-End Sub
-
-Sub testInit()
-
-
+    Set outlookExplorer = Outlook.ActiveExplorer
+    Set selection = outlookExplorer.selection
+    
+    Set currentEmail = selection.Item(1)
+    
+    Debug.Print currentEmail.Sender
+    
+    Set newEmail = CreateItem(olMailItem)
+    
+    If currentEmail.Sender <> "Dan Seethaler" Then
+        newEmail.To = Replace(currentEmail.To, "Dan Seethaler", currentEmail.Sender)
+    Else
+        newEmail.To = currentEmail.To
+    End If
+    
+    newEmail.CC = currentEmail.CC
+    newEmail.Display
 
 End Sub
