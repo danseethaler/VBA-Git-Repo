@@ -364,7 +364,7 @@ For Each cell In workRange
 
     If InStr(1, List, cell) = 0 And Not IsEmpty(cell) Then
     
-        cell = Replace(cell, " ", "")
+        'cell = Replace(cell, " ", "")
         
         'Determine if the cell is not in a PS EmpID format.
         'If not, ask the user if the cell should be converted to an EmpID format
