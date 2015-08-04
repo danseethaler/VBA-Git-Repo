@@ -3,6 +3,7 @@ Option Explicit
 
 Sub MoveDIEmails()
 
+'Define the variables used in the macro
     Dim Outlook As New Outlook.Application
     Dim namespace As Outlook.namespace
     Dim destFolder As Outlook.folder
@@ -16,15 +17,19 @@ Sub MoveDIEmails()
     Dim DirectoryPath As String
     Dim Continue As String
     Dim PP As Integer
-    
+
+'Set the PP variable equal to the result of the RecentPP function.
 PP = RecentPP()
-    
+
+'If the current date is after the Payroll Tuesday then a warning
+'message is displayed to confirm the user wants to continue.
 If (Date - RecentPPDate()) > 4 Then
     Continue = MsgBox("It appears that PP" & PP & " data has already been processed." & vbNewLine & vbNewLine & _
     "Do you want to continue?", vbYesNo, "Continue?")
     If Continue = vbNo Then Exit Sub
 End If
  
+ 'Set the namespace for the application.
  Set namespace = Application.GetNamespace("MAPI")
 
 'Set the destination folder to the GSC-DIPayroll Inbox
@@ -34,6 +39,7 @@ On Error Resume Next
 On Error GoTo 0
 
 'If the GSC-DIPayroll box doesn't exit then exit the sub
+'after providing the user a message box.
 If destFolder = "" Then
     MsgBox "Please add the GSC-DIPayroll box to your Outlook before running this macro."
     Set namespace = Nothing
@@ -49,33 +55,55 @@ On Error GoTo 0
 'attachements that were received since the beginning of the last pay period end date
 afterPP = "[ReceivedTime] > '" & Format(RecentPPDate(), "ddddd h:nn AMPM") & "'"
 
+'Create collections based on the filter above
 Set attachmentEmails = cabinetFolder.items.Restrict(afterPP)
+
+'Further restrict the collection to contain only emails with attachments
 Set attachmentEmails = attachmentEmails.Restrict("[Attachment] = True")
 
+'Iterate throught each email in the attachmentEmails
+'collection to find attachments with a .txt extension.
 For a = attachmentEmails.Count To 1 Step -1
+
+    'Iterate through all the attachments in this email.
     For i = 1 To attachmentEmails(a).Attachments.Count
+    
+        'If the email does end in .txt then move the email to the inbox
         If InStr(UCase(attachmentEmails(a).Attachments(i).DisplayName), ".TXT") > 0 Then
             attachmentEmails(a).Move destFolder
+            
+            'Increase the counter for the message box at the end.
             EmailCount = EmailCount + 1
             Exit For
         End If
+        
     Next i
+    
 Next a
     
     'Validate that all files have been removed from the GSC folder.
+    'If there are currently files in the GSC folder these should
+    'be deleted before proceeding.
     If Dir("\\L12239\CXFUSR\Appl\HR800\PS\Temp\GSC\") <> "" Then
+    
+        'Inform the user that these files need to be deleted.
         MsgBox "There appears to be files/folders within the HR800\PS\Temp\GSC folder. This should be emptied " & _
             "out before the files for the current pay period are saved."
+            
         'Open the GSC folder so the extra files can be moved out
         DirectoryPath = "\\L12239\CXFUSR\Appl\HR800\PS\Temp\GSC\"
         Shell "C:\WINDOWS\explorer.exe """ & DirectoryPath & "", vbNormalFocus
+        
     End If
 
+    'Send a message to the user with the number of emails moved to the inbox.
     MsgBox (EmailCount & " email(s) have been moved to the " & destFolder & " folder.")
     
 End Sub
     
 Sub SaveDITextFileAttachments()
+
+    'Initialize variables for this macro.
     Dim Continue As String
     Dim holdsAttachment As String
     Dim emailAttachments As Attachments
@@ -102,13 +130,22 @@ Sub SaveDITextFileAttachments()
     Dim DateSubmittedString As String
     Dim AvgSize As Long
     
+    'Define Exce as the MS Excel Application.
+    '***********************************
+    'If this statement triggers an error then stop the macro,
+    'click on Tools in the toolbar, select References..., then
+    'find the Microsoft Excel 15.0 object library and check it.
+    'Then restart the program.
     Dim Excel As Excel.Application
+    '***********************************
+    
     Dim DIWorkbook As Workbook
     Dim WBookName As String
     
     Dim myNamespace As Outlook.namespace
     Set myNamespace = Application.GetNamespace("MAPI")
     
+    'Set the PP variable to the most recent pay period number
     PP = RecentPP()
     
     'Set process folder to the GSC-DIPayroll Inbox
@@ -454,6 +491,14 @@ Loop
 
 End Function
 
+'Returns the most recent pay period end date.
 Function RecentPPDate() As Date
+
+'Today minus static PPEnd Date
+'Get remainder when divided by 14
+'Subtract that number from today
+'Provides the most recent PP End date
+
 RecentPPDate = Date - (Date - CDate("8/15/2014")) Mod 14
+
 End Function
