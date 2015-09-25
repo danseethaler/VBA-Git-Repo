@@ -15,25 +15,24 @@ Dim WBook As Workbook
 Dim Excel As Excel.Application
 Dim FullPath As String
 Dim dicKey As String
-Dim newQueries As New Scripting.Dictionary
 
 'Setup the dictionary of queries
 'Make sure to Click Tools > References... > Then click
 'The Microsoft Scripting Runtime Library
+
+Dim newQueries As New Scripting.Dictionary
 Dim dict As New Scripting.Dictionary
 Dim keyy As Variant
 Dim dictString As String
 
-dict.Add "AW_COMPFREQ", 1
-dict.Add "AW_COMPFREQ2", 1
+dict.Add "AW_COMPFREQCHECK", 1
+dict.Add "AW_COMPFREQCHECK2", 1
 dict.Add "HOURLY_MONTHLYCOMP", 1
-dict.Add "AW_BENEFITPROGRAMCHECK", 1
 dict.Add "AW_TERM_NO_REASONCODE", 1
 dict.Add "SWTS_TAX", 1
 dict.Add "LOC_TAX_AUDIT_COUNTY", 1
 dict.Add "TL_STAT_WORKGROUP", 1
 dict.Add "CELL_PHONE_REIMB_QA", 1
-dict.Add "AW_MORE_THAN_ONE_PRIMARY_JOB", 1
 dict.Add "AW_GSCPARTTIMEWORKGROUP", 1
 dict.Add "AW_STDBU", 1
 dict.Add "EMP_NO_SSN", 1
@@ -43,7 +42,6 @@ dict.Add "GSC_REPORTS_TO_BLANK", 1
 dict.Add "AW_PSD_NEXEO_QUALITY", 1
 dict.Add "SUT_TAX_2", 1
 dict.Add "GSC_POSITIONS_CHANGEDHRS", 1
-dict.Add "AWQA_PAPERADVICE", 1
 dict.Add "EAF_NOTPROCESSED", 1
 dict.Add "AW_CWRPAYGROUP", 1
 dict.Add "INTERNATIONAL_REGION_USA", 1
@@ -61,17 +59,21 @@ dict.Add "DIPAYDISTRIBUTIONTERMDAILY_QA", 1
 dict.Add "AWQA_CES_EMPLCLASS", 1
 dict.Add "GSC_DEPTID_TASKPROFILE_COMP", 1
 dict.Add "AWQA_I9_SSN_MISMATCH", 1
-dict.Add "CHANGE_TO_SSN", 1
 dict.Add "INCORRECT_BENEFIT_SER_ERRORREP", 1
+dict.Add "AW_ALTERNATEBENEFIT", 1
 
 
 Dim namespace As Outlook.namespace
 Set namespace = Application.GetNamespace("MAPI")
 
 For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
-    If InStr(1, Item.Subject, "QA Query Flag") > 0 Then QueryCount = QueryCount + 1
+    If InStr(1, Item.Subject, "QA Query Flag") > 0 Then
+    QueryCount = QueryCount + 1
     Item.UnRead = False
+    End If
 Next Item
+
+Debug.Print QueryCount
 
 If QueryCount < 1 Then
 Set namespace = Nothing
@@ -113,7 +115,7 @@ DirectoryPath = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\"
     End With
     
 '*********************************
-'Loop through every email (MailItem) in the primary inbox
+'Loop through every email (MailItem) in the primary inbox to find those flagged as a QA Query
 For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
     If InStr(1, Item.Subject, "QA Query Flag") > 0 Then
         For Each Atmt In Item.Attachments
@@ -162,10 +164,14 @@ For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
                     
                 End If
             
-            Item.Delete
         Next
 
     End If
+Next
+
+For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
+    Debug.Print Item.Subject
+    If InStr(1, Item.Subject, "QA Query Flag") > 0 Then Item.Delete
 Next
 
 With Excel
@@ -182,7 +188,7 @@ If dict.Count > 0 Then
 
     For Each keyy In dict
         dictString = dictString + keyy + ", "
-    Next
+   Next
     
     MsgBox "Missing the following " + CStr(dict.Count) + " queries: " + dictString
 End If
@@ -204,3 +210,4 @@ Set WBook = Nothing
 Set Excel = Nothing
 
 End Sub
+
