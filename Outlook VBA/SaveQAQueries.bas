@@ -3,6 +3,7 @@ Option Explicit
 
 Public Sub GetAttachments()
 
+'Setting Variables for later reference in code
 Dim Item As MailItem
 Dim Atmt As attachment
 Dim FileName As String
@@ -14,12 +15,12 @@ Dim WBookName As String
 Dim WBook As Workbook
 Dim Excel As Excel.Application
 Dim FullPath As String
-Dim dicKey As String
 
 'Setup the dictionary of queries
 'Make sure to Click Tools > References... > Then click
 'The Microsoft Scripting Runtime Library
 
+Dim dicKey As String
 Dim newQueries As New Scripting.Dictionary
 Dim dict As New Scripting.Dictionary
 Dim keyy As Variant
@@ -62,25 +63,37 @@ dict.Add "AWQA_I9_SSN_MISMATCH", 1
 dict.Add "INCORRECT_BENEFIT_SER_ERRORREP", 1
 dict.Add "AW_ALTERNATEBENEFIT", 1
 
+Dim queryEmails As New collection
 
 Dim namespace As Outlook.namespace
 Set namespace = Application.GetNamespace("MAPI")
 
+'For each email in the current user's inbox
 For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
+
+    'Check to see if the email has just one attachment and that the email was sent by GlobalHR
     If InStr(1, Item.Subject, "QA Query Flag") > 0 Then
-    QueryCount = QueryCount + 1
-    Item.UnRead = False
+        QueryCount = QueryCount + 1
+        Item.UnRead = False
+        'Add each email from GlobalHR which has one attachment to the queryEmails collection
+        queryEmails.Add Item
     End If
+    
 Next Item
 
-Debug.Print QueryCount
-
 If QueryCount < 1 Then
-Set namespace = Nothing
-Exit Sub
+    Set namespace = Nothing
+    MsgBox "There were no emails with the 'QA Query Flag'."
+    Exit Sub
 End If
 
+QueryCount = 0
+
+'Set the directory path to the employee's desktop
 DirectoryPath = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\"
+
+'AJ - comment out the above line and uncomment the below line
+'DirectoryPath = "M:\HRPS Team\Backstop Queries\Archive" & "\"
 
 '-Initialize Excel Objects-
 
@@ -95,10 +108,16 @@ DirectoryPath = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\"
 
 'Check if the file in question already exists
     If Dir(DirectoryPath & WBookName) <> "" Then
-        'Check is workbook is open
+        
+        'Turn of the display of errors in case there is no excel workbook with this name to open
         On Error Resume Next
+        
+        'Check is workbook is open
         Set WBook = Excel.Workbooks(WBookName)
+        
+        'Turn the display of errors back on
         On Error GoTo 0
+        
             If WBook Is Nothing Then
             Set WBook = Excel.Workbooks.Open(DirectoryPath & WBookName)
             Else
@@ -114,24 +133,21 @@ DirectoryPath = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\"
         .ScreenUpdating = False
     End With
     
-'*********************************
-'Loop through every email (MailItem) in the primary inbox to find those flagged as a QA Query
-For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
-    If InStr(1, Item.Subject, "QA Query Flag") > 0 Then
+'Loop through every email (MailItem) in the primary inbox
+For Each Item In queryEmails
         For Each Atmt In Item.Attachments
             If InStr(UCase(Atmt.DisplayName), ".XLS") > 0 Then
-            FileName = Atmt.FileName
-            
-            'Set the dicKey variable to part of the filename
-            dicKey = Left(FileName, InStr(1, FileName, "-") - 1)
-            
-            If dict.Item(dicKey) Then
-                dict.Remove (dicKey)
-            Else
-                newQueries.Add dicKey, 1
-            End If
-
-            'Remove the query from the dictionary
+                FileName = Atmt.FileName
+                
+                'Set the dicKey variable to part of the filename
+                dicKey = Left(FileName, InStr(1, FileName, "-") - 1)
+                
+                'Remove the query from the dictionary
+                If dict.Item(dicKey) Then
+                    dict.Remove (dicKey)
+                Else
+                    newQueries.Add dicKey, 1
+                End If
             
                 'If the file already exists in the directory path give it a unique name
                 If Dir(DirectoryPath & FileName) <> "" Then
@@ -145,18 +161,29 @@ For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
 '**********************************
 'Aggregate Files with Data
                 
+                'Create the variable FullPath by adding the previously defined variables of DirectoryPath (my backstop query folder) and FileName (the name of the together
                 FullPath = DirectoryPath & FileName
 
             End If
             
+            'Save the Excel file to my backstop query folder
             Atmt.SaveAsFile FullPath
             
+            'Open the Excel file just saved
             Excel.Workbooks.Open FullPath
+                'Check to see if the query has any data and if not delete it
                 If Excel.Workbooks(FileName).Sheets(1).Range("B1") = " 0" Then
                     Excel.Workbooks(FileName).Close
                     Kill FullPath
                 Else
+                'If the query has data, name the new tab with the first 30 charaters of the subject since there is a character limit(34) to the name of a tab in Excel
                 Excel.Workbooks(FileName).Sheets(1).Name = Left(FileName, 30)
+                If Left(Item.Subject, 6) = "Output" Then
+                    Excel.Workbooks(FileName).Sheets(1).Range("C1").Value = Item.Body
+                    Else
+                    Excel.Workbooks(FileName).Sheets(1).Range("C1").Value = Item.Subject
+                End If
+                'Add the new tab after the previous one in the workbook
                 Excel.Workbooks(FileName).Sheets(1).Move After:=Excel.Workbooks(WBookName).Sheets(1)
                 Kill FullPath
                 
@@ -164,15 +191,13 @@ For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
                     
                 End If
             
+            QueryCount = QueryCount + 1
+            Item.Delete
         Next
-
-    End If
 Next
 
-For Each Item In namespace.GetDefaultFolder(olFolderInbox).items
-    Debug.Print Item.Subject
-    If InStr(1, Item.Subject, "QA Query Flag") > 0 Then Item.Delete
-Next
+If Excel.Workbooks(WBookName).Sheets(1).Name = "Sheet1" Then _
+Excel.Workbooks(WBookName).Sheets(1).Delete
 
 With Excel
     .Workbooks(WBookName).Save
@@ -210,4 +235,3 @@ Set WBook = Nothing
 Set Excel = Nothing
 
 End Sub
-
